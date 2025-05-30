@@ -1,6 +1,7 @@
 package com.example.DocLib.dto.patient;
 
 import com.example.DocLib.enums.DrugStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -27,27 +29,19 @@ public class PatientDrugDto {
 
     @NotBlank
     @Size(max = 256)
-    private String name;
-
+    private String drugName;
     @NotBlank
     @Size(max = 256)
-    private String scientificName;
-
-    @NotBlank
-    @Size(max = 256)
-    private String medicationDosage;
-
-    @NotBlank
-    @Size(max = 256)
-    private String pharmaceuticalForm;
-
-    @NotBlank
-    @Size(max = 256)
-    private String company;
+    private String Dosage;
 
     private boolean isNew;
-
     @NotNull
+    private int Frequency;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate startDate ;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate endDate ;
+
     private DrugStatus drugStatus;
 
     private List<DrugAlarmDto> drugAlarms;

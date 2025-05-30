@@ -3,20 +3,14 @@ package com.example.DocLib.controllers;
 import com.example.DocLib.dto.UserDto;
 import com.example.DocLib.models.authentication.ApiResponse;
 import com.example.DocLib.models.authentication.LoginRequest;
-import com.example.DocLib.security.UserPrincipleConfig;
-import com.example.DocLib.services.AuthServices;
-import com.example.DocLib.services.UserServicesImp;
+import com.example.DocLib.services.implementation.AuthServices;
+import com.example.DocLib.services.implementation.UserServicesImp;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -32,37 +26,31 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("/hi")
-    public String greating(){
-        return "HelloWorld";
-    }
-
+    /**
+     * Registers a new user.
+     *
+     * @param userDto The UserDto object containing the user information to be registered.
+     * @return ResponseEntity containing the created UserDto if registration is successful.
+     */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid UserDto userDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error -> {
-                errors.put(error.getField(), error.getDefaultMessage());
-            });
-            return ResponseEntity.badRequest().body(errors);
-        }
-        System.out.println(bindingResult.toString());
-
+    public ResponseEntity<?> register(@RequestBody @Valid UserDto userDto) {
+        System.out.println(userDto.toString());
         UserDto createdUser = authServices.registerUser(userDto);
         return ResponseEntity.ok(createdUser);
     }
 
 
+    /**
+     * Logs in the user using the provided credentials.
+     *
+     * @param request The login request containing the username and password.
+     * @return ApiResponse containing the user data if login is successful, or an error message if login fails.
+     */
     @PostMapping("/login")
     public ApiResponse<UserDto> loginUser(@RequestBody @Validated LoginRequest request){
         return authServices.attemptLogin(request.getUsername(),request.getPassword());
     }
 
-    @GetMapping("/secured")
-    public String secured(@AuthenticationPrincipal UserPrincipleConfig userPrincipleConfig){
-        return "if use see this you are logged in as :"
-                + userPrincipleConfig.getUsername()+"and your id is "+ userPrincipleConfig.getUserId();
-    }
 
 
 }

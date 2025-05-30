@@ -1,12 +1,13 @@
 package com.example.DocLib.models;
 import com.example.DocLib.enums.Gender;
 import com.example.DocLib.enums.Roles;
+import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.patient.Patient;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
-import java.util.Set;
+import java.time.LocalDate;
 
 @Builder
 @Data
@@ -41,7 +42,7 @@ public  class User {
     private String phoneNumber;
 
     @Column(name = "date_of_birth")
-    private Date DOB;
+    private LocalDate DOB;
 
     @Column(name = "image_url")
     private  String ImageUrl;
@@ -54,12 +55,12 @@ public  class User {
     private Gender gender;
 
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDate createdAt;
 
-    @OneToOne(mappedBy = "user")
-    private Doctor doctors;
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private Doctor doctor;
 
-    @OneToOne(mappedBy = "user")
-    private Patient patients;
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private Patient patient;
 
 }

@@ -1,5 +1,6 @@
 package com.example.DocLib.models;
 
+import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.patient.Patient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

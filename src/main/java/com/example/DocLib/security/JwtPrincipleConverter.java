@@ -1,6 +1,7 @@
 package com.example.DocLib.security;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.DocLib.configruation.UserPrincipleConfig;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 

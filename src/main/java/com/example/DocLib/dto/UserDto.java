@@ -1,9 +1,10 @@
 package com.example.DocLib.dto;
 
+import com.example.DocLib.dto.doctor.DoctorDto;
 import com.example.DocLib.dto.patient.PatientDto;
 import com.example.DocLib.enums.Gender;
 import com.example.DocLib.enums.Roles;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -45,7 +47,8 @@ public class UserDto {
     private String phoneNumber;
 
     @NotNull(message = "Date of birth is required")
-    private Date DOB;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate DOB;
 
     private String ImageUrl;
 
@@ -55,8 +58,9 @@ public class UserDto {
     @NotNull(message = "Gender is required")
     private Gender gender;
 
-    private Date createdAt;
-
-    private PatientDto patientDto;
-    private DoctorDto doctorDto;
+    private LocalDate createdAt;
+    @JsonProperty("patient")
+    private PatientDto patient;
+    @JsonProperty("doctor")
+    private DoctorDto doctor;
 }

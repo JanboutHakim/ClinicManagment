@@ -1,7 +1,6 @@
-package com.example.DocLib.security;
+package com.example.DocLib.configruation;
 
 import com.example.DocLib.repositories.UserRepositories;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,12 +1,13 @@
-package com.example.DocLib.services;
+package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.UserDto;
 import com.example.DocLib.models.User;
 import com.example.DocLib.models.authentication.ApiResponse;
-import com.example.DocLib.models.authentication.LoginResponse;
+import com.example.DocLib.models.doctor.Doctor;
+import com.example.DocLib.models.patient.Patient;
 import com.example.DocLib.repositories.UserRepositories;
 import com.example.DocLib.security.JwtIssuer;
-import com.example.DocLib.security.UserPrincipleConfig;
+import com.example.DocLib.configruation.UserPrincipleConfig;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -75,9 +76,22 @@ public class AuthServices {
     }
     @Transactional
     public UserDto registerUser(UserDto userDto) {
-        User newUser = modelMapper.map(userDto, User.class);
-        newUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        User savedUser = userRepositories.save(newUser);
+        User user = modelMapper.map(userDto, User.class);
+
+        // Only map and link Doctor if it's present
+        if (userDto.getDoctor() != null) {
+            Doctor doctor = modelMapper.map(userDto.getDoctor(), Doctor.class);
+            doctor.setUser(user);  // Required due to @MapsId
+            user.setDoctor(doctor);  // Required for cascading save
+        }
+        else if(userDto.getPatient() != null){
+            Patient patient = modelMapper.map(userDto.getPatient(), Patient.class);
+            patient.setUser(user);  // Required due to @MapsId
+            user.setPatient(patient);  // Required for cascading save
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepositories.save(user);  // Will also save Doctor due to cascade
+
         return modelMapper.map(savedUser,UserDto.class);
     }
 

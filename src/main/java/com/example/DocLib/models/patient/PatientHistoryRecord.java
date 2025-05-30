@@ -1,8 +1,13 @@
 package com.example.DocLib.models.patient;
 import com.example.DocLib.enums.HistoryRecordTypes;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.Date;
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 
 @Entity
 public class PatientHistoryRecord {

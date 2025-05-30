@@ -1,7 +1,7 @@
-package com.example.DocLib.services;
+package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.repositories.UserRepositories;
-import com.example.DocLib.security.UserPrincipleConfig;
+import com.example.DocLib.configruation.UserPrincipleConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Component
+@Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
     private final UserRepositories userRepositories;
