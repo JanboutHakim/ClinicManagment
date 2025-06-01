@@ -1,6 +1,6 @@
 package com.example.DocLib.dto.doctor;
 
-import com.example.DocLib.dto.AppointmentDto;
+import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.InsuranceCompanyDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +19,8 @@ public class DoctorDto {
 
     private String address;
 
+    private int checkupDuration;
+
     private List<SpecializationsDto> specialization;
 
     private int yearsOfExperience;
@@ -33,7 +35,7 @@ public class DoctorDto {
 
     private List<DoctorServiceDto> services;
 
-    private List<DoctorScheduleDto> patients;
+    private List<DoctorScheduleDto> doctorSchedules;
 
     private List<DoctorHolidayScheduleDto> holidaySchedules;
 

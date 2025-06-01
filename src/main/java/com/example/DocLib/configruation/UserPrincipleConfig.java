@@ -1,6 +1,6 @@
 package com.example.DocLib.configruation;
 
-import com.example.DocLib.repositories.UserRepositories;
+import com.example.DocLib.repositories.UserRepository;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +12,7 @@ import java.util.Collection;
 @Builder
 public class UserPrincipleConfig implements UserDetails {
 
-    private final UserRepositories userRepositories;
+    private final UserRepository userRepository;
     @Getter
     private final Long userId;
     private final String username;

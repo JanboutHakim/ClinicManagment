@@ -1,8 +1,10 @@
 package com.example.DocLib.controllers;
 
+import com.example.DocLib.dto.RefreshTokenRequest;
 import com.example.DocLib.dto.UserDto;
 import com.example.DocLib.models.authentication.ApiResponse;
 import com.example.DocLib.models.authentication.LoginRequest;
+import com.example.DocLib.models.authentication.TokenResponse;
 import com.example.DocLib.services.implementation.AuthServices;
 import com.example.DocLib.services.implementation.UserServicesImp;
 import jakarta.validation.Valid;
@@ -47,8 +49,13 @@ public class AuthController {
      * @return ApiResponse containing the user data if login is successful, or an error message if login fails.
      */
     @PostMapping("/login")
-    public ApiResponse<UserDto> loginUser(@RequestBody @Validated LoginRequest request){
-        return authServices.attemptLogin(request.getUsername(),request.getPassword());
+    public ResponseEntity<TokenResponse> loginUser(@RequestBody @Validated LoginRequest request){
+        return ResponseEntity.ok(authServices.attemptLogin(request.getUsername(),request.getPassword()));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
+        return ResponseEntity.ok(authServices.refreshToken(request.getRefreshToken()));
     }
 
 

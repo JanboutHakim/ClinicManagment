@@ -1,5 +1,6 @@
 package com.example.DocLib.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,12 +23,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        extractTokenFromRequest(request)
-                .map(jwtDecoder::decode)
-                .map(jwtPrincipleConverter::convert)
-                .map(UserPrincipleAuthenticationToken::new )
-                .ifPresent(authentication -> SecurityContextHolder.getContext().setAuthentication(authentication));
-        filterChain.doFilter(request,response);
+        try {
+            extractTokenFromRequest(request)
+                    .map(jwtDecoder::decode)
+                    .filter(jwt -> "access".equals(jwt.getClaim("type").asString()))
+                    .map(jwtPrincipleConverter::convert)
+                    .map(UserPrincipleAuthenticationToken::new)
+                    .ifPresent(authentication -> SecurityContextHolder.getContext().setAuthentication(authentication));
+        } catch (JwtException e) {
+            // Handle invalid tokens
+        }
+        filterChain.doFilter(request, response);
     }
 
     private Optional<String> extractTokenFromRequest(HttpServletRequest request){

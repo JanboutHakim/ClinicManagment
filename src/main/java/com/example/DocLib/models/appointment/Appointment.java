@@ -1,15 +1,16 @@
-package com.example.DocLib.models;
+package com.example.DocLib.models.appointment;
 
+import com.example.DocLib.enums.AppointmentStatus;
 import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.patient.Patient;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
-import java.sql.Time;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -30,18 +31,16 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private String reason;
+    private String notes;
+    private String cancellationReason;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    @Column(name = "appointment_date")
-    private Date appointmentDate;
-
-    @Column(name = "start_time")
-    private Time startTime;
-
-    @Column(name = "end_time")
-    private Time endTime;
-
-    @Column(name = "note")
-    private String note;
+    @Enumerated
+    private AppointmentStatus status;
 
 
 

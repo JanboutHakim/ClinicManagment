@@ -3,7 +3,7 @@ package com.example.DocLib.services.implementation;
 import com.example.DocLib.dto.InsuranceCompanyDto;
 import com.example.DocLib.models.InsuranceCompany;
 import com.example.DocLib.models.doctor.*;
-import com.example.DocLib.repositories.DoctorRepositories;
+import com.example.DocLib.repositories.DoctorRepository;
 import com.example.DocLib.services.interfaces.DoctorServices;
 import com.example.DocLib.dto.doctor.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,19 +14,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class DoctorServicesImp implements DoctorServices {
 
-    private final DoctorRepositories doctorRepository;
+    private final DoctorRepository doctorRepository;
     private final ModelMapper modelMapper;
     @Qualifier("modelMapperWithId")
     private final ModelMapper modelMapperWithoutId;
 
     @Autowired
-    public DoctorServicesImp(DoctorRepositories doctorRepository, ModelMapper modelMapper, ModelMapper modelMapperWithoutId) {
+    public DoctorServicesImp(DoctorRepository doctorRepository, ModelMapper modelMapper, ModelMapper modelMapperWithoutId) {
         this.doctorRepository = doctorRepository;
         this.modelMapper = modelMapper;
         this.modelMapperWithoutId = modelMapperWithoutId;
@@ -315,7 +314,7 @@ public class DoctorServicesImp implements DoctorServices {
                 .collect(Collectors.toList());
     }
 
-    private Doctor getDoctorEntity(Long id) {
+    public Doctor getDoctorEntity(Long id) {
         return doctorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Doctor with ID " + id + " not found"));
     }

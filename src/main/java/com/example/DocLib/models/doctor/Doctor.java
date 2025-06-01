@@ -1,10 +1,9 @@
 package com.example.DocLib.models.doctor;
 
 import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
-import com.example.DocLib.models.Appointment;
+import com.example.DocLib.models.appointment.Appointment;
 import com.example.DocLib.models.InsuranceCompany;
 import com.example.DocLib.models.User;
-import com.example.DocLib.models.doctor.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +29,8 @@ public class Doctor {
     private User user;
 
     private String address;
+
+    private int checkupDurationInMinutes;
 
     private int yearsOfExperience;
 

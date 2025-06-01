@@ -1,25 +1,21 @@
 
 package com.example.DocLib.dto.patient;
 
-import com.example.DocLib.dto.AppointmentDto;
+import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.InsuranceCompanyDto;
-import com.example.DocLib.dto.UserDto;
 import com.example.DocLib.models.patient.Measurement;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PatientDto extends UserDto {
+public class PatientDto   {
 
-    @NotNull(message = "Patient ID is required")
+
     private Long patientId;
 
     private String address;

@@ -26,17 +26,18 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/auth/register", "/auth/login").permitAll()
-                        .anyRequest().permitAll()
+           //             .requestMatchers("/**").hasRole("ADMIN")
+                        .requestMatchers("/doctor/**","/appointments/**").hasRole("DOCTOR")
+                        .requestMatchers("/patient/**","/appointments/**").hasRole("PATIENT")
+                        .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

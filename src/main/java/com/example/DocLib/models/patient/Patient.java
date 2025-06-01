@@ -1,9 +1,7 @@
 package com.example.DocLib.models.patient;
 
-import com.example.DocLib.enums.Gender;
-import com.example.DocLib.enums.Roles;
 import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
-import com.example.DocLib.models.Appointment;
+import com.example.DocLib.models.appointment.Appointment;
 import com.example.DocLib.models.InsuranceCompany;
 import com.example.DocLib.models.User;
 import jakarta.persistence.*;
@@ -12,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.function.Consumer;
 

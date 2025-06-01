@@ -1,6 +1,6 @@
 package com.example.DocLib.services.implementation;
 
-import com.example.DocLib.repositories.UserRepositories;
+import com.example.DocLib.repositories.UserRepository;
 import com.example.DocLib.configruation.UserPrincipleConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,11 +15,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
-    private final UserRepositories userRepositories;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-       var user = userRepositories.findByUsername(username).orElseThrow();
+       var user = userRepository.findByUsername(username).orElseThrow();
         System.out.println(user.toString());
         return UserPrincipleConfig.builder()
                 .userId(user.getId())

@@ -18,17 +18,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PatientDrugDto {
-    @NotNull
     private Long id;
 
     @NotNull
     private Long patientId;
 
-    @NotNull
     private Long drugId;
 
-    @NotBlank
-    @Size(max = 256)
     private String drugName;
     @NotBlank
     @Size(max = 256)

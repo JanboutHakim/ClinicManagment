@@ -6,11 +6,11 @@ import com.example.DocLib.dto.patient.*;
 import java.util.List;
 
 
-public interface PatientService {
+public interface PatientServices {
 
         // Core
         List<PatientDto> getAllPatients();
-        PatientDto getPatient(Long id);
+        PatientDto getPatientById(Long id);
 
         // Drug
         PatientDto addDrug(Long id, PatientDrugDto patientDrugDto);

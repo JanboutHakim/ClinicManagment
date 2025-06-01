@@ -2,10 +2,11 @@ package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.*;
 import com.example.DocLib.dto.patient.*;
+import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.*;
 import com.example.DocLib.models.patient.*;
 import com.example.DocLib.repositories.PatientRepository;
-import com.example.DocLib.services.interfaces.PatientService;
+import com.example.DocLib.services.interfaces.PatientServices;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,20 +14,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class PatientServicesImp implements PatientService {
+public class PatientServicesImp implements PatientServices {
 
     private final PatientRepository patientRepository;
-
+    private final DrugServicesImp drugServiceImp;
     private final ModelMapper modelMapper;
 
 
     @Autowired
-    public PatientServicesImp(PatientRepository patientRepository, ModelMapper modelMapper) {
+    public PatientServicesImp(PatientRepository patientRepository, DrugServicesImp drugServiceImp, ModelMapper modelMapper) {
         this.patientRepository = patientRepository;
+        this.drugServiceImp = drugServiceImp;
         this.modelMapper = modelMapper;
 
     }
@@ -39,7 +40,7 @@ public class PatientServicesImp implements PatientService {
                 .collect(Collectors.toList());
     }
     @Override
-    public PatientDto getPatient(Long id){
+    public PatientDto getPatientById(Long id){
         return patientRepository.findById(id)
                 .map(patient -> modelMapper.map(patient,PatientDto.class))
                 .orElseThrow(() -> new EntityNotFoundException("Patient with id " + id + " not found"));
@@ -47,10 +48,20 @@ public class PatientServicesImp implements PatientService {
 
     @Override
     @Transactional
-    public PatientDto addDrug(Long id, PatientDrugDto patientDrugDto) {
-        Patient patient = getPatientEntity(id);
-        patient.addDrug(modelMapper.map(patientDrugDto,PatientDrug.class));
+    public PatientDto addDrug(Long patientId, PatientDrugDto patientDrugDto) {
+        Patient patient = getPatientEntity(patientId);
+        if(patientDrugDto.isNew())
+             addNewDrug(patientId,patientDrugDto);
+        else {
+            patientDrugDto.setDrugName(drugServiceImp.getDrugByID(patientDrugDto.getDrugId()).getName());
+            patient.addDrug(modelMapper.map(patientDrugDto, PatientDrug.class));
+        }
+
         return convertPatientToDto(patient);
+    }
+
+    private void addNewDrug(Long patientId, PatientDrugDto patientDrugDto) {
+
     }
 
     @Override
@@ -63,12 +74,10 @@ public class PatientServicesImp implements PatientService {
 
     @Override
     @Transactional
-    public PatientDto addInsuranceCompany(Long id, InsuranceCompanyDto insuranceCompanyDto){
-        Patient patient = patientRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Patient with id " + id + " not found"));
+    public PatientDto addInsuranceCompany(Long patientId, InsuranceCompanyDto insuranceCompanyDto){
+        Patient patient = getPatientEntity(patientId);
         patient.getInsuranceCompanies().add(modelMapper.map(insuranceCompanyDto, InsuranceCompany.class));
-        Patient updatedPatient = patientRepository.save(patient);
-        return modelMapper.map(updatedPatient, PatientDto.class);
+        return convertPatientToDto(patient);
     }
 
     @Override
@@ -78,9 +87,8 @@ public class PatientServicesImp implements PatientService {
 
     @Override
     @Transactional  // This annotation is important, it makes the method transactional
-    public PatientDto setDrugAlarm(PatientDrugDto patientDrugDto, List<DrugAlarmDto> paDrugAlarmDto, Long id){
-        Patient patient = patientRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Patient with id " + id + " not found"));
+    public PatientDto setDrugAlarm(PatientDrugDto patientDrugDto, List<DrugAlarmDto> paDrugAlarmDto, Long patientId){
+        Patient patient = getPatientEntity(patientId);
         PatientDrug patientDrug = modelMapper.map(patientDrugDto, PatientDrug.class);
         List<PatientDrug> patientDrugList = patient.getDrugs();
         for(PatientDrug patientDrug1: patientDrugList){
@@ -95,7 +103,7 @@ public class PatientServicesImp implements PatientService {
             }
         }
         // If we haven't found the matching drug, throw an exception or return a default value.
-        throw new EntityNotFoundException("Drug with id " + patientDrugDto.getId() + " not found");
+        throw new ResourceNotFoundException("Drug with id " + patientDrugDto.getId() + " not found");
     }
 
     @Override
@@ -167,9 +175,8 @@ public class PatientServicesImp implements PatientService {
 
     @Override
     @Transactional
-    public List<PatientHistoryRecordDto> getAllHistoryRecords(Long id) {
-        Patient patient = patientRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Patient with id " + id + " not found"));
+    public List<PatientHistoryRecordDto> getAllHistoryRecords(Long patientId) {
+        Patient patient = getPatientEntity(patientId);
         return patient.getPatientHistoryRecords()
                 .stream()
                 .map(historyRecord -> modelMapper.map(historyRecord, PatientHistoryRecordDto.class))
@@ -195,9 +202,9 @@ public class PatientServicesImp implements PatientService {
         return null;
     }
 
-    private Patient getPatientEntity(Long id) {
+    public Patient getPatientEntity(Long id) {
         return patientRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Doctor with ID " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor with ID " + id + " not found"));
     }
     private PatientDto convertPatientToDto(Patient patient){
         return modelMapper.map(patient,PatientDto.class);

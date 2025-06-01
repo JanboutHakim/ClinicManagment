@@ -1,0 +1,282 @@
+package com.example.DocLib.controllers;
+
+import com.example.DocLib.dto.appointment.AppointmentDto;
+import com.example.DocLib.dto.appointment.LocalDateTimeBlock;
+import com.example.DocLib.dto.appointment.MonthsDto;
+import com.example.DocLib.dto.doctor.TimeBlock;
+import com.example.DocLib.enums.AppointmentStatus;
+import com.example.DocLib.services.implementation.AppointmentServicesImp;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@RestController
+@RequestMapping("/appointments")
+public class AppointmentController {
+
+    private final AppointmentServicesImp appointmentServicesImp;
+    @Autowired
+    public AppointmentController(AppointmentServicesImp appointmentServicesImp) {
+        this.appointmentServicesImp = appointmentServicesImp;
+    }
+
+    /**
+     * Retrieves an appointment by its ID.
+     *
+     * @param appointmentId The ID of the appointment to retrieve.
+     * @return ResponseEntity containing the AppointmentDto representing the appointment.
+     */
+    @GetMapping("/{appointmentId}")
+    public ResponseEntity<AppointmentDto> getAppointmentById(@PathVariable Long appointmentId) {
+        AppointmentDto appointmentDto = appointmentServicesImp.getAppointmentById(appointmentId);
+        return ResponseEntity.ok(appointmentDto);
+    }
+
+    /**
+     * Creates a new appointment based on the provided AppointmentDto.
+     *
+     * @param appointmentDto The AppointmentDto object containing appointment details.
+     * @return ResponseEntity with the created AppointmentDto object and HTTP status code 201 (CREATED).
+     */
+    @PostMapping("/")
+    public ResponseEntity<AppointmentDto> createAppointment(@Valid @RequestBody AppointmentDto appointmentDto) {
+        AppointmentDto createdAppointment = appointmentServicesImp.createAppointment(appointmentDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
+    }
+
+    /**
+     * Deletes an appointment by the provided appointment ID.
+     *
+     * @param appointmentId the ID of the appointment to be deleted
+     * @return ResponseEntity indicating the success of the operation with no content
+     */
+    @DeleteMapping("/{appointmentId}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long appointmentId) {
+        appointmentServicesImp.deleteAppointment(appointmentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Updates the status of an appointment by rescheduling it with a new appointmentDto.
+     *
+     * @param appointmentId The ID of the appointment to be updated.
+     * @param appointmentDto The AppointmentDto object containing the new information for rescheduling.
+     * @return ResponseEntity containing the updated AppointmentDto with the new status.
+     */
+    @PutMapping("/reschedule/{appointmentId}")
+    public ResponseEntity<AppointmentDto> updateAppointmentStatus(@PathVariable Long appointmentId, @RequestBody @Valid AppointmentDto appointmentDto) {
+        AppointmentDto updatedAppointment = appointmentServicesImp.rescheduleAppointment(appointmentId, appointmentDto);
+        return ResponseEntity.ok(updatedAppointment);
+    }
+
+    /**
+     * Retrieves a list of appointments associated with a specific doctor.
+     *
+     * @param doctorId The unique identifier of the doctor for whom appointments are to be fetched.
+     * @return ResponseEntity<List < AppointmentDto>> A response entity containing a list of AppointmentDto objects
+     */
+    @GetMapping("/doctor/{doctorId}/appointments")
+    public ResponseEntity<List<AppointmentDto>> getAppointmentsByDoctor(@PathVariable Long doctorId) {
+        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByDoctor(doctorId);
+        return ResponseEntity.ok(appointments);
+    }
+
+    /**
+     * Retrieves a list of appointments associated with a specific patient.
+     *
+     * @param patientId The ID of the patient for whom to retrieve appointments
+     * @return A list of AppointmentDto objects representing appointments for the specified patient
+     */
+    @GetMapping("/patient/{patientId}/appointments")
+    public ResponseEntity<List<AppointmentDto>> getAppointmentsByPatient(@PathVariable Long patientId) {
+        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByPatient(patientId);
+        return ResponseEntity.ok(appointments);
+    }
+
+    /**
+     * Retrieves a list of upcoming appointments for a specific doctor.
+     *
+     * @param doctorId The ID of the doctor for whom to retrieve upcoming appointments.
+     * @return ResponseEntity with a list of AppointmentDto objects representing upcoming appointments for the specified doctor.
+     */
+    @GetMapping("/doctor/{doctorId}/upcoming-appointments")
+    public ResponseEntity<List<AppointmentDto>> getUpcomingAppointmentsForDoctor(@PathVariable Long doctorId) {
+        List<AppointmentDto> appointments = appointmentServicesImp.getUpcomingAppointmentsForDoctor(doctorId);
+        return ResponseEntity.ok(appointments);
+    }
+
+    /**
+     * Retrieve a list of upcoming appointments for a specific patient.
+     *
+     * @param patientId The ID of the patient for whom to fetch the upcoming appointments.
+     * @return ResponseEntity containing a List of AppointmentDto objects representing the upcoming appointments for the patient.
+     */
+    @GetMapping("/patient/{patientId}/upcoming-appointments")
+    public ResponseEntity<List<AppointmentDto>> getUpcomingAppointmentsForPatient(@PathVariable Long patientId) {
+        List<AppointmentDto> appointments = appointmentServicesImp.getUpcomingAppointmentsForPatient(patientId);
+        return ResponseEntity.ok(appointments);
+    }
+
+    /**
+     * Retrieves the available slots for a specific doctor based on their weekly schedule.
+     *
+     * @param doctorId The ID of the doctor for whom the available slots are being retrieved.
+     * @return A list of LocalDateTime objects representing the available slots for the specified doctor.
+     */
+    @GetMapping("/doctor/{doctorId}/available-slots")
+    public ResponseEntity<List<LocalDateTime>> getDoctorAvailableSlots(@PathVariable Long doctorId) {
+        List<LocalDateTime> availableSlots = appointmentServicesImp.getDoctorAvailableSlots(doctorId);
+        return ResponseEntity.ok(availableSlots);
+    }
+
+    /**
+     * Confirms the appointment with the specified appointmentId.
+     *
+     * @param appointmentId The ID of the appointment to confirm.
+     * @return ResponseEntity containing the confirmed AppointmentDto.
+     */
+    @PutMapping("/doctor/confirm")
+    public ResponseEntity<AppointmentDto> confirmAppointment(@RequestParam Long appointmentId) {
+        AppointmentDto confirmedAppointment = appointmentServicesImp.confirmAppointment(appointmentId);
+        return ResponseEntity.ok(confirmedAppointment);
+    }
+
+    /**
+     *
+     */
+    @PutMapping("/{appointmentId}/cancel-by-clinic")
+    public ResponseEntity<AppointmentDto> cancelAppointmentByClinic(
+            @PathVariable Long appointmentId,
+            @RequestParam String cancellationReason) {
+        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByClinic(appointmentId, cancellationReason);
+        return ResponseEntity.ok(canceled);
+    }
+
+    /**
+     * Cancels an appointment by the patient.
+     *
+     * @param appointmentId The ID of the appointment to be canceled.
+     * @param cancellationReason The reason for canceling the appointment.
+     * @return A ResponseEntity containing the AppointmentDto of the canceled appointment.
+     */
+    @PutMapping("/{appointmentId}/cancel-by-patient")
+    public ResponseEntity<AppointmentDto> cancelAppointmentByPatient(
+            @PathVariable Long appointmentId,
+            @RequestParam String cancellationReason) {
+        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByPatient(appointmentId, cancellationReason);
+        return ResponseEntity.ok(canceled);
+    }
+
+    /**
+     * Updates the status of an appointment identified by the given appointmentId.
+     *
+     * @param appointmentId the ID of the appointment to update
+     * @param status the new status to set for the appointment
+     * @return ResponseEntity containing the updated AppointmentDto object with the new status
+     */
+    @PutMapping("/{appointmentId}/status")
+    public ResponseEntity<AppointmentDto> updateAppointmentStatus(
+            @PathVariable Long appointmentId,
+            @RequestParam AppointmentStatus status) {
+        AppointmentDto updated = appointmentServicesImp.updateAppointmentStatus(appointmentId, status);
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Get appointments filtered by a specific status.
+     *
+     * @param status The status by which to filter the appointments.
+     * @return ResponseEntity containing a list of AppointmentDto objects filtered by the specified status.
+     */
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<AppointmentDto>> getAppointmentsByStatus(@PathVariable AppointmentStatus status) {
+        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByStatus(status);
+        return ResponseEntity.ok(appointments);
+    }
+
+    /**
+     * Retrieves a list of appointments within the specified date range.
+     *
+     * @param timeBlock The LocalDateTimeBlock object containing the start and end timestamps.
+     * @return ResponseEntity with a list of AppointmentDto objects representing appointments within the date range.
+     */
+    @GetMapping("/date-range")
+    public ResponseEntity<List<AppointmentDto>> getAppointmentsByDateRange(@RequestBody @Valid LocalDateTimeBlock timeBlock) {
+        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByDateRange(timeBlock.getStart(), timeBlock.getEnd());
+        return ResponseEntity.ok(appointments);
+    }
+
+    /**
+     * Check for upcoming appointments and send reminder notifications to patients.
+     * This method is triggered periodically at a fixed rate.
+     * The upcoming appointments are identified within a specific time range and a reminder message is sent to the respective patient.
+     *
+     * @return ResponseEntity<Void> indicating the success of checking upcoming appointments.
+     */
+    @PostMapping("/check-upcoming-appointments")
+    public ResponseEntity<Void> checkUpcomingAppointments() {
+        appointmentServicesImp.checkUpcomingAppointments();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Retrieve a list of cancelled appointments for a specific doctor.
+     *
+     * @param doctorId The unique identifier of the doctor for whom to retrieve cancelled appointments.
+     * @return ResponseEntity<List < AppointmentDto>> A list of AppointmentDto objects representing the cancelled appointments.
+     */
+    @GetMapping("/doctor/{doctorId}/cancelled-appointments")
+    public ResponseEntity<List<AppointmentDto>> getCancelledAppointments(@PathVariable Long doctorId) {
+        List<AppointmentDto> cancelledAppointments = appointmentServicesImp.getCancelledAppointments(doctorId);
+        return ResponseEntity.ok(cancelledAppointments);
+    }
+
+    /**
+     * Retrieves the count of appointments based on the provided status.
+     *
+     * @param status The status of appointments to count
+     * @return The total count of appointments with the specified status
+     */
+    @GetMapping("/count-by-status")
+    public ResponseEntity<Integer> getAppointmentCountByStatus(@RequestParam AppointmentStatus status) {
+        int count = appointmentServicesImp.getAppointmentCountByStatus(status);
+        return ResponseEntity.ok(count);
+    }
+
+    /**
+     * Retrieves the cancellation rate for a specific doctor based on their appointment data.
+     *
+     * @param doctorId the ID of the doctor for whom to retrieve the cancellation rate
+     * @return the cancellation rate as a Double value
+     */
+    @GetMapping("/doctor/{doctorId}/cancellation-rate")
+    public ResponseEntity<Double> getDoctorCancellationRate(@PathVariable Long doctorId) {
+        double rate = appointmentServicesImp.getDoctorCancellationRate(doctorId);
+        return ResponseEntity.ok(rate);
+    }
+
+    /**
+     *
+     * Retrieves the history of appointments for a specific patient within a specified number of months in the past.
+     *
+     * @param patientId The ID of the patient for whom to retrieve the appointment history.
+     * @param monthsBack The MonthsDto object containing the number of months in the past to retrieve history.
+     * @return ResponseEntity containing a list of AppointmentDto objects representing the patient's appointment history.
+     */
+    @GetMapping("/patient/{patientId}/history")
+    public ResponseEntity<List<AppointmentDto>> getPatientHistory(
+            @PathVariable Long patientId,
+            @RequestBody @Valid MonthsDto monthsBack) {
+        List<AppointmentDto> history = appointmentServicesImp.getPatientHistory(patientId, monthsBack.getMonths());
+        return ResponseEntity.ok(history);
+    }
+
+
+
+}

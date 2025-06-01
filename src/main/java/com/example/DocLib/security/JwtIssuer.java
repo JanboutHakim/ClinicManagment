@@ -18,12 +18,23 @@ import java.util.List;
 @EnableConfigurationProperties(JwtProperties.class)
 public class JwtIssuer {
     private final JwtProperties jwtProperties;
-    public String issue(long userId,String username, List<String> roles){
+
+    public String issueAccessToken(long userId, String username, List<String> roles) {
         return JWT.create()
                 .withSubject(String.valueOf(userId))
-                .withExpiresAt((Instant.now().plus(Duration.of(1, ChronoUnit.DAYS))))
-                .withClaim("u",username)
-                .withClaim("r",roles)
+                .withExpiresAt(Instant.now().plusMillis(jwtProperties.getAccessTokenExpirationMs()))
+                .withClaim("u", username)
+                .withClaim("r", roles)
+                .withClaim("type", "access")
+                .sign(Algorithm.HMAC256(jwtProperties.getSecretKey()));
+    }
+
+    public String issueRefreshToken(long userId, String username) {
+        return JWT.create()
+                .withSubject(String.valueOf(userId))
+                .withExpiresAt(Instant.now().plusMillis(jwtProperties.getRefreshTokenExpirationMs()))
+                .withClaim("u", username)
+                .withClaim("type", "refresh")
                 .sign(Algorithm.HMAC256(jwtProperties.getSecretKey()));
     }
 }
