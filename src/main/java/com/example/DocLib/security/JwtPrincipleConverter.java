@@ -9,7 +9,7 @@ import java.util.List;
 
 @Component
 public class JwtPrincipleConverter {
-    public UserPrincipleConfig convert(DecodedJWT jwt){
+    public UserPrincipleConfig convert(DecodedJWT jwt) {
         return UserPrincipleConfig.builder()
                 .userId(Long.valueOf(jwt.getSubject()))
                 .username(jwt.getClaim("u").asString())
@@ -17,15 +17,23 @@ public class JwtPrincipleConverter {
                 .build();
     }
 
-    private List<SimpleGrantedAuthority> extractAuthorityFromClaim(DecodedJWT jwt){
+    private List<SimpleGrantedAuthority> extractAuthorityFromClaim(DecodedJWT jwt) {
         var claim = jwt.getClaim("r");
-        if(claim.isNull() || claim.isMissing()) return List.of();
+        if (claim.isNull() || claim.isMissing()) {
+            System.err.println("No roles found in JWT token");
+            return List.of();
+        }
+        
         List<String> roles = claim.asList(String.class);
+        System.out.println("Roles from JWT: " + roles);
+        
         return roles.stream()
-                .map(SimpleGrantedAuthority::new)
+                .map(role -> {
+                    // Ensure role has ROLE_ prefix
+                    String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+                    System.out.println("Creating authority: " + authority);
+                    return new SimpleGrantedAuthority(authority);
+                })
                 .toList();
     }
-
-
-
 }
