@@ -22,8 +22,10 @@ public class JwtPrincipleConverter {
         if(claim.isNull() || claim.isMissing()) return List.of();
         List<String> roles = claim.asList(String.class);
         return roles.stream()
-                .map(SimpleGrantedAuthority::new)  // roles already have "ROLE_" prefix
+                .map(SimpleGrantedAuthority::new)
                 .toList();
     }
+
+
 
 }

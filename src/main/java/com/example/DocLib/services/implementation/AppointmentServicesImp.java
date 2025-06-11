@@ -4,6 +4,7 @@ import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.appointment.AppointmentNotificationDto;
 import com.example.DocLib.dto.doctor.TimeBlock;
 import com.example.DocLib.enums.AppointmentStatus;
+import com.example.DocLib.exceptions.custom.AppointmentNotAvailableAtThisTime;
 import com.example.DocLib.models.appointment.Appointment;
 import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.doctor.DoctorHolidaySchedule;
@@ -39,7 +40,7 @@ public class AppointmentServicesImp implements AppointmentServices {
     private final DoctorServicesImp doctorServicesImp;
     private final PatientServicesImp patientServicesImp;
     // e.g., notify patients 10 minutes before the appointment
-    private static final long REMINDER_THRESHOLD_MINUTES = 10;
+    private static final long REMINDER_THRESHOLD_MINUTES = 60;
 
 
     @Autowired
@@ -54,12 +55,19 @@ public class AppointmentServicesImp implements AppointmentServices {
     @Override
     @Transactional
     @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId"+"-"+"#appointmentDto.startTime")
-    public AppointmentDto createAppointment(AppointmentDto appointmentDto) {
+    public AppointmentDto addAppointment(AppointmentDto appointmentDto) {
         Appointment appointment = new Appointment();
         appointmentDto.setStatus(AppointmentStatus.ON_HOLD);
-        if(doctorServicesImp.getDoctorById(appointmentDto.getDoctorId()) != null &&
-            patientServicesImp.getPatientById(appointmentDto.getPatientId())!= null)
-               appointment= appointmentRepository.save(modelMapper.map(appointmentDto,Appointment.class));
+        if(!isDoctorAvailable(appointmentDto.getDoctorId(), appointmentDto.getStartTime()) || isDoctorOnVacation(appointmentDto.getPatientId(),appointmentDto.getStartTime()))
+            throw new AppointmentNotAvailableAtThisTime("Doctor is not available at the requested time.");
+        else if(isPatientAvailable(appointmentDto.getPatientId(),appointmentDto.getStartTime()))
+            throw new AppointmentNotAvailableAtThisTime("Patient is not available at the requested time.");
+        else {
+            appointment = appointmentRepository.save(modelMapper.map(appointmentDto, Appointment.class));
+            messagingTemplate.convertAndSend("app/ws/appointments", appointment);
+
+        }
+
         return convertAppointmentToDto(appointment);
     }
 
@@ -81,7 +89,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         Appointment appointment = getAppointmentEntity(appointmentId);
 
         // Get the doctor checkup duration
-        LocalDateTime newEndTime = appointmentDto.getStartTime().plusMinutes(doctorServicesImp.getDoctorById(appointmentDto.getDoctorId()).getCheckupDuration());
+        LocalDateTime newEndTime = appointmentDto.getStartTime().plusMinutes(doctorServicesImp.getDoctorById(appointmentDto.getDoctorId()).getCheckupDurationInMinutes());
 
         boolean available = isDoctorAvailable(appointment.getDoctor().getId(), appointmentDto.getStartTime());
         if (!available) {
@@ -158,7 +166,7 @@ public class AppointmentServicesImp implements AppointmentServices {
 
     @Override
     public boolean isDoctorAvailable(Long doctorId, LocalDateTime startTime) {
-        LocalDateTime endTime = startTime.plusMinutes(doctorServicesImp.getDoctorById(doctorId).getCheckupDuration()); // default duration or based on config
+        LocalDateTime endTime = startTime.plusMinutes(doctorServicesImp.getDoctorById(doctorId).getCheckupDurationInMinutes()); // default duration or based on config
 
         List<Appointment> existingAppointments = appointmentRepository.findOverlappingAppointments(
                 doctorId, startTime, endTime, List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.ON_HOLD)
@@ -167,17 +175,14 @@ public class AppointmentServicesImp implements AppointmentServices {
         return existingAppointments.isEmpty();
     }
     @Override
-    public boolean isDoctorOnVacation(Long doctorId, LocalDateTime startTime){
-        Doctor doctor = doctorServicesImp.getDoctorEntity(doctorId);
-        List<DoctorHolidaySchedule> doctorHolidayScheduleList = doctor.getHolidaySchedules();
-
-        for(DoctorHolidaySchedule doctorHolidaySchedule:doctorHolidayScheduleList){
-            if(doctorHolidaySchedule.getStartTime().equals(LocalTime.from(startTime))&&
-                doctorHolidaySchedule.getHolidayDate().equals(LocalDate.from(startTime)) ){
-                return false;
-            }
-        }
-        return true;
+    public boolean isDoctorOnVacation(Long doctorId, LocalDateTime dateTime) {
+        List<DoctorHolidaySchedule> doctorHolidaySchedules = doctorServicesImp.findHolidayScheduleByDate(
+                doctorId, dateTime);
+        return !doctorHolidaySchedules.isEmpty();
+    }
+    @Override
+    public boolean isPatientAvailable(Long patientId, LocalDateTime startTime) {
+        return !appointmentRepository.existsByPatientIdAndStartTime(patientId, startTime);
     }
 
     @Override
@@ -193,8 +198,9 @@ public class AppointmentServicesImp implements AppointmentServices {
             if (doctorSchedule.containsKey(day)) {
                 for (TimeBlock block : doctorSchedule.get(day)) {
                     LocalDateTime slotStart = LocalDateTime.of(date, block.getStart());
-                    while (slotStart.plusMinutes(checkupDuration).isBefore(LocalDateTime.of(date, block.getEnd()))) {
-                        if (isDoctorAvailable(doctorId, slotStart)&& isDoctorOnVacation(doctorId,slotStart)) {
+                    while (!slotStart.plusMinutes(checkupDuration).isAfter(LocalDateTime.of(date, block.getEnd())))
+                    {
+                        if (isDoctorAvailable(doctorId, slotStart)&& !isDoctorOnVacation(doctorId,slotStart)) {
                             availableSlots.add(slotStart);
                         }
                         slotStart = slotStart.plusMinutes(30);
@@ -239,9 +245,9 @@ public class AppointmentServicesImp implements AppointmentServices {
         for (Appointment appointment : upcomingAppointments) {
             Patient patient = appointment.getPatient();
 
-            // Create your custom message DTO
             AppointmentNotificationDto notification = new AppointmentNotificationDto(
-                    "Reminder: You have an appointment at " + appointment.getStartTime()
+                    "Reminder: You have an appointment at " + appointment.getStartTime(),
+                    convertAppointmentToDto(appointment)
             );
 
             messagingTemplate.convertAndSendToUser(
@@ -317,8 +323,8 @@ public class AppointmentServicesImp implements AppointmentServices {
                 .orElseThrow(() -> new EntityNotFoundException("Appointment with ID " + appointmentId + " not found"));
     }
     @Cacheable(value = "checkupDuration", key = "#doctorId")
-    private int getCachedCheckupDuration(Long doctorId) {
-        return doctorServicesImp.getDoctorById(doctorId).getCheckupDuration();
+    public int getCachedCheckupDuration(Long doctorId) {
+        return doctorServicesImp.getDoctorById(doctorId).getCheckupDurationInMinutes();
     }
 
 

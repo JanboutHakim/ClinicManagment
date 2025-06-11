@@ -1,265 +1,144 @@
 package com.example.DocLib.controllers;
 
 import com.example.DocLib.dto.InsuranceCompanyDto;
+import com.example.DocLib.dto.doctor.DoctorDto;
 import com.example.DocLib.dto.patient.*;
+import com.example.DocLib.services.implementation.AuthServices;
 import com.example.DocLib.services.implementation.PatientServicesImp;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.AccessDeniedException; // Add necessary import for AccessDeniedException
 
 import java.util.List;
-
+/**
+ * REST controller responsible for handling patient-related operations,
+ * such as updating medical history, measurements, insurance, drugs, and retrieving associated doctors.
+ *
+ * <p>All routes require the authenticated user to match the {@code patientId} in the path.
+ * If the authenticated user ID does not match, an {@link AccessDeniedException} is thrown.</p>
+ *
+ * <p>Base path: {@code /patient}</p>
+ * @author Janbout Hakim
+ **/
 @RestController
 @RequestMapping("/patient")
 public class PatientController {
-    private final PatientServicesImp patientServicesImp;
 
+    private final PatientServicesImp patientServicesImp;
 
     public PatientController(PatientServicesImp patientServicesImp) {
         this.patientServicesImp = patientServicesImp;
     }
 
     /**
-     * Retrieves a list of all patients.
+     * Deletes a measurement record for the authenticated patient.
      *
-     * @return a List of PatientDto objects representing all patients in the system
+     * @param patientId     ID of the patient.
+     * @param measurementId ID of the measurement to delete.
+     * @return Updated patient information.
+     * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @GetMapping("/all")
-    public List<PatientDto> getAllPatients() {
-        return patientServicesImp.getAllPatients();
-    }
-
-    /**
-     * Retrieve a specific patient by their ID.
-     *
-     * @param id The ID of the patient to retrieve.
-     * @return ResponseEntity<PatientDto> The ResponseEntity containing the PatientDto object.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<PatientDto> getPatient(@PathVariable Long id) {
-        PatientDto patientDto = patientServicesImp.getPatientById(id);
+    @DeleteMapping("/{patientId}/Measurement/{measurementId}")
+    public ResponseEntity<PatientDto> deleteMeasurement(@PathVariable Long patientId, @PathVariable Long measurementId) {
+        checkAuthenticatedUser(patientId);
+        PatientDto patientDto = patientServicesImp.deleteMeasurement(patientId, measurementId);
         return ResponseEntity.ok(patientDto);
     }
 
-
-    /**
-     * Adds a new measurement for a specified patient.
-     *
-     * @param id The ID of the patient to add the measurement for.
-     * @param measurementDto The MeasurementDto object containing the measurement details.
-     * @return ResponseEntity with the updated PatientDto after adding the measurement.
-     */
-    @PostMapping("/{id}/Measurement")
-    public ResponseEntity<PatientDto> addMeasurement(@PathVariable Long id, @RequestBody @Valid MeasurementDto measurementDto) {
-        PatientDto patientDto = patientServicesImp.addMeasurement(id, measurementDto);
-        return ResponseEntity.ok(patientDto);
+    private static void checkAuthenticatedUser(Long patientId) {
+        if (!AuthServices.getCurrentUserId().equals(patientId)) {
+            throw new AccessDeniedException("You are not allowed to update this user.");
+        }
     }
 
     /**
-     * Deletes a measurement for a specific patient.
+     * Updates drug information for the authenticated patient.
      *
-     * @param id The ID of the patient whose measurement is to be deleted
-     * @param measurementId The ID of the measurement to be deleted
-     * @return ResponseEntity with the updated PatientDto after deleting the measurement
+     * @param patientId       ID of the patient.
+     * @param patientDrugDto  DTO containing updated drug information.
+     * @return Updated patient information.
+     * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @DeleteMapping("/{id}/Measurement/{measurementId}")
-    public ResponseEntity<PatientDto> deleteMeasurement(@PathVariable Long id, @PathVariable Long measurementId) {
-        PatientDto patientDto = patientServicesImp.deleteMeasurement(id, measurementId);
+    @PostMapping("/{patientId}/Drug")
+    public ResponseEntity<PatientDto> updateDrug(@PathVariable Long patientId, @RequestBody @Valid PatientDrugDto patientDrugDto) {
+        checkAuthenticatedUser(patientId);
+        PatientDto patientDto = patientServicesImp.updateDrug(patientId, patientDrugDto);
         return ResponseEntity.ok(patientDto);
     }
 
     /**
-     * Adds a drug to a patient's record.
+     * Updates analysis records for the authenticated patient.
      *
-     * @param id The ID of the patient.
-     * @param patientDrugDto The DTO object representing the drug to add.
-     * @return ResponseEntity containing the updated PatientDto after adding the drug.
+     * @param patientId   ID of the patient.
+     * @param analyseDto  DTO containing new analysis data.
+     * @return Updated patient information.
+     * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{id}/Drug")
-    public ResponseEntity<PatientDto> addDrug(@PathVariable Long id, @RequestBody @Valid PatientDrugDto patientDrugDto) {
-        PatientDto patientDto = patientServicesImp.addDrug(id, patientDrugDto);
+    @PostMapping("/{patientId}/Analyse")
+    public ResponseEntity<PatientDto> updateAnalyse(@PathVariable Long patientId, @RequestBody @Valid AnalyseDto analyseDto) {
+        checkAuthenticatedUser(patientId);
+        PatientDto patientDto = patientServicesImp.updateAnalyse(patientId, analyseDto);
         return ResponseEntity.ok(patientDto);
     }
 
     /**
-     * Deletes a drug for a patient.
+     * Updates the insurance company associated with the authenticated patient.
+     * (NOTE: This method is currently returning an empty PatientDto — implementation may be incomplete.)
      *
-     * @param id The ID of the patient.
-     * @param patientDrugId The ID of the drug to be deleted for the patient.
-     * @return ResponseEntity containing the updated PatientDto after deleting the drug.
+     * @param patientId            ID of the patient.
+     * @param insuranceCompanyDto  DTO with new insurance company details.
+     * @return Updated patient information (currently returns empty DTO).
+     * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @DeleteMapping("/{id}/Drug/{patientDrugId}")
-    public ResponseEntity<PatientDto> deleteDrug(@PathVariable Long id, @PathVariable Long patientDrugId) {
-        PatientDto patientDto = patientServicesImp.deleteDrug(id, patientDrugId);
+    @PostMapping("/{patientId}/InsuranceCompany")
+    public ResponseEntity<PatientDto> updateInsuranceCompany(@PathVariable Long patientId, @RequestBody @Valid InsuranceCompanyDto insuranceCompanyDto) {
+        checkAuthenticatedUser(patientId);
+        // Currently not implemented
+        return ResponseEntity.ok(new PatientDto());
+    }
+
+    /**
+     * Adds a new measurement record for the authenticated patient.
+     *
+     * @param patientId       ID of the patient.
+     * @param measurementDto  DTO with measurement details.
+     * @return Updated patient information.
+     * @throws AccessDeniedException if the authenticated user is not the owner of the record.
+     */
+    @PostMapping("/{patientId}/getAllMeasurement")
+    public ResponseEntity<PatientDto> updateMeasurement(@PathVariable Long patientId, @RequestBody @Valid MeasurementDto measurementDto) {
+        checkAuthenticatedUser(patientId);
+        PatientDto patientDto = patientServicesImp.updateMeasurement(patientId, measurementDto);
         return ResponseEntity.ok(patientDto);
     }
 
     /**
-     * Sets drug alarms for a given patient.
+     * Updates the patient's history record.
      *
-     * @param id The ID of the patient.
-     * @param patientDrugDto The data transfer object representing the patient drug details.
-     * @param drugAlarmDtos A list of drug alarm data transfer objects to set for the patient drug.
-     *
-     * @return ResponseEntity containing the updated PatientDto after setting the drug alarms.
+     * @param patientId   ID of the patient.
+     * @param historyDto  DTO with updated history record.
+     * @return Updated patient information.
+     * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{id}/setDrugAlarm")
-    public ResponseEntity<PatientDto> setDrugAlarm(@PathVariable Long id, @RequestBody @Valid PatientDrugDto patientDrugDto, @RequestBody List<DrugAlarmDto> drugAlarmDtos) {
-        PatientDto updatedPatientDto = patientServicesImp.setDrugAlarm(patientDrugDto, drugAlarmDtos, id);
-        return ResponseEntity.ok(updatedPatientDto);
-    }
-
-    /**
-     * Adds a new analysis to the patient with the given ID.
-     *
-     * @param id The ID of the patient to add the analysis to.
-     * @param analyseDto The AnalyseDto object containing the details of the analysis to be added.
-     * @return ResponseEntity containing the updated PatientDto after adding the analysis.
-     */
-    @PostMapping("/{id}/Analyse")
-    public ResponseEntity<PatientDto> addAnalyse(@PathVariable Long id, @RequestBody @Valid AnalyseDto analyseDto) {
-        PatientDto patientDto = patientServicesImp.addAnalyse(id, analyseDto);
-        return ResponseEntity.ok(patientDto);
-    }
-    /**
-     * Adds an insurance company to the patient identified by the given ID.
-     *
-     * @param id The ID of the patient to whom the insurance company is being added.
-     * @param insuranceCompanyDto The DTO representing the insurance company to add.
-     * @return ResponseEntity with the updated PatientDto after adding the insurance company.
-     */
-    @PostMapping("/{id}/InsuranceCompany")
-    public ResponseEntity<PatientDto> addInsuranceCompany(@PathVariable Long id, @RequestBody @Valid InsuranceCompanyDto insuranceCompanyDto) {
-        PatientDto patientDto = patientServicesImp.addInsuranceCompany(id, insuranceCompanyDto);
+    @PostMapping("/{patientId}/updateHistory")
+    public ResponseEntity<PatientDto> updateHistoryRecord(@PathVariable Long patientId, @RequestBody @Valid PatientHistoryRecordDto historyDto) {
+        checkAuthenticatedUser(patientId);
+        PatientDto patientDto = patientServicesImp.updateHistoryRecord(patientId, historyDto);
         return ResponseEntity.ok(patientDto);
     }
 
     /**
-     * Deletes an analysis for a specific patient.
+     * Retrieves a list of doctors associated with the authenticated patient.
      *
-     * @param id The ID of the patient.
-     * @param patientAnalyseId The ID of the analysis to be deleted.
-     * @return ResponseEntity with the updated PatientDto after deleting the analysis.
+     * @param patientId ID of the patient.
+     * @return List of doctors.
+     * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @DeleteMapping("/{id}/Analyse/{patientAnalyseId}")
-    public ResponseEntity<PatientDto> deleteAnalyse(@PathVariable Long id, @PathVariable Long patientAnalyseId) {
-        PatientDto patientDto = patientServicesImp.deleteAnalyse(id, patientAnalyseId);
-        return ResponseEntity.ok(patientDto);
+    @GetMapping("/{patientId}/doctors")
+    public ResponseEntity<List<DoctorDto>> getPatientDoctors(@PathVariable Long patientId) {
+        checkAuthenticatedUser(patientId);
+        List<DoctorDto> doctorDto = patientServicesImp.getPatientDoctors(patientId);
+        return ResponseEntity.ok(doctorDto);
     }
-    /**
-     * Deletes an insurance company from a patient's list of insurance companies based on the provided ID.
-     *
-     * @param id The ID of the patient from which the insurance company should be deleted.
-     * @param insuranceCompanyDto The InsuranceCompanyDto object representing the insurance company to be deleted.
-     * @return ResponseEntity containing the updated PatientDto after deleting the insurance company.
-     */
-    @DeleteMapping("/{id}/deleteInsuranceCompany")
-    public ResponseEntity<PatientDto> deleteInsuranceCompany(@PathVariable Long id, @RequestBody @Valid InsuranceCompanyDto insuranceCompanyDto) {
-        PatientDto patientDto = patientServicesImp.deleteInsuranceCompany(id, insuranceCompanyDto);
-        return ResponseEntity.ok(patientDto);
-    }
-
-    /**
-     * Retrieves all measurements for a specific patient.
-     *
-     * @param id The unique identifier of the patient.
-     * @return A ResponseEntity containing a list of MeasurementDto objects representing all measurements of the specified patient.
-     */
-    @PostMapping("/{id}/getAllMeasurement")
-    public ResponseEntity<List<MeasurementDto>> getAllMeasurement(@PathVariable Long id) {
-        List<MeasurementDto> measurementDtos = patientServicesImp.getAllMeasurement(id);
-        return ResponseEntity.ok(measurementDtos);
-    }
-
-    /**
-     * Updates a drug for a specific patient.
-     *
-     * @param id The ID of the patient.
-     * @param patientDrugDto The DTO containing information about the drug to be updated.
-     * @return ResponseEntity containing the updated PatientDto.
-     */
-    @PutMapping("/{id}/updateDrug")
-    public ResponseEntity<PatientDto> updateDrug(@PathVariable Long id, @RequestBody @Valid PatientDrugDto patientDrugDto) {
-        PatientDto patientDto = patientServicesImp.updateDrug(id, patientDrugDto);
-        return ResponseEntity.ok(patientDto);
-    }
-
-    /**
-     * Updates the analysis for a patient.
-     *
-     * @param id The ID of the patient.
-     * @param analyseDto The AnalyseDto object containing the updated analysis information.
-     * @return ResponseEntity with the updated PatientDto object.
-     */
-    @PutMapping("/{id}/updateAnalyse")
-    public ResponseEntity<PatientDto> updateAnalyse(@PathVariable Long id, @RequestBody @Valid AnalyseDto analyseDto) {
-        PatientDto patientDto = patientServicesImp.updateAnalyse(id, analyseDto);
-        return ResponseEntity.ok(patientDto);
-    }
-
-    /**
-     * Updates the measurement for a specific patient.
-     *
-     * @param id The ID of the patient whose measurement is being updated.
-     * @param measurementDto The MeasurementDto object containing the updated measurement data.
-     * @return ResponseEntity with the updated PatientDto object.
-     */
-    @PutMapping("/{id}/updateMeasurement")
-    public ResponseEntity<PatientDto> updateMeasurement(@PathVariable Long id, @RequestBody @Valid MeasurementDto measurementDto) {
-        PatientDto patientDto = patientServicesImp.updateMeasurement(id, measurementDto);
-        return ResponseEntity.ok(patientDto);
-    }
-
-    /**
-     * Retrieves all history records for a specific patient.
-     *
-     * @param id The ID of the patient for whom history records need to be retrieved.
-     * @return A ResponseEntity with a list of PatientHistoryRecordDto objects representing the history records of the patient.
-     */
-    @GetMapping("/{id}/history")
-    public ResponseEntity<List<PatientHistoryRecordDto>> getAllHistoryRecords(@PathVariable Long id) {
-        List<PatientHistoryRecordDto> records = patientServicesImp.getAllHistoryRecords(id);
-        return ResponseEntity.ok(records);
-    }
-
-    /**
-     * Add a history record to a patient's history.
-     *
-     * @param id the unique identifier of the patient
-     * @param historyDto the DTO containing information of the history record to be added
-     * @return ResponseEntity containing the updated PatientDto object after adding the history record
-     */
-    @PostMapping("/{id}/addHistory")
-    public ResponseEntity<PatientDto> addHistoryRecord(@PathVariable Long id, @RequestBody @Valid PatientHistoryRecordDto historyDto) {
-        PatientDto patientDto = patientServicesImp.addHistoryRecord(id, historyDto);
-        return ResponseEntity.ok(patientDto);
-    }
-
-    /**
-     * Deletes a history record for a specific patient.
-     *
-     * @param id The ID of the patient.
-     * @param historyRecordId The ID of the history record to be deleted.
-     * @return ResponseEntity containing the updated PatientDto after deleting the history record.
-     */
-    @DeleteMapping("/{id}/deleteHistory/{historyRecordId}")
-    public ResponseEntity<PatientDto> deleteHistoryRecord(@PathVariable Long id, @PathVariable Long historyRecordId) {
-        PatientDto patientDto = patientServicesImp.deleteHistoryRecord(id, historyRecordId);
-        return ResponseEntity.ok(patientDto);
-    }
-
-    /**
-     *
-     */
-    @PutMapping("/{id}/updateHistory")
-    public ResponseEntity<PatientDto> updateHistoryRecord(@PathVariable Long id, @RequestBody @Valid PatientHistoryRecordDto historyDto) {
-        PatientDto patientDto = patientServicesImp.updateHistoryRecord(id, historyDto);
-        return ResponseEntity.ok(patientDto);
-    }
-
-
-
-
-
-
 }

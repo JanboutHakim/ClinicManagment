@@ -8,12 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-@Getter
 @Builder
 public class UserPrincipleConfig implements UserDetails {
 
     private final UserRepository userRepository;
-    @Getter
     private final Long userId;
     private final String username;
     private final String password;
@@ -32,9 +30,15 @@ public class UserPrincipleConfig implements UserDetails {
         return password;
     }
 
+
     @Override
     public String getUsername() {
         return username;
+    }
+
+
+    public Long getUserId() {
+        return userId;
     }
 
     @Override

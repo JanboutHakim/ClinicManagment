@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @NoArgsConstructor
@@ -26,12 +27,9 @@ public class DoctorHolidaySchedule {
     @JoinColumn(name="doctor_id", nullable=false)
     private Doctor doctor;
 
-    @Column(name = "holiday_date")
-    private LocalDate holidayDate;
+    private LocalDateTime startTime;
 
-    private LocalTime startTime;
-
-    private LocalTime endTime;
+    private LocalDateTime endTime;
 
     private boolean allDay;
 

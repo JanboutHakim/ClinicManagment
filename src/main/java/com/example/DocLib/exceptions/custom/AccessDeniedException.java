@@ -16,23 +16,10 @@ public class AccessDeniedException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private ErrorResponse apiResponse;
-
-    private String message;
-
-    public AccessDeniedException(ErrorResponse apiResponse) {
-        super();
-        this.apiResponse = apiResponse;
-    }
-
     public AccessDeniedException(String message) {
         super(message);
-        this.message = message;
     }
 
-    public AccessDeniedException(String message, Throwable cause) {
-        super(message, cause);
-    }
 
 
 }

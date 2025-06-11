@@ -19,7 +19,7 @@ public class DoctorDto {
 
     private String address;
 
-    private int checkupDuration;
+    private int checkupDurationInMinutes;
 
     private List<SpecializationsDto> specialization;
 

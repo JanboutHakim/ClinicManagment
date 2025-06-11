@@ -1,6 +1,7 @@
 package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.UserDto;
+import com.example.DocLib.exceptions.custom.AccessDeniedException;
 import com.example.DocLib.models.User;
 import com.example.DocLib.models.authentication.TokenResponse;
 import com.example.DocLib.models.doctor.Doctor;
@@ -146,6 +147,35 @@ public class AuthServices {
             default -> throw new IllegalArgumentException("Unsupported role: " + userDto.getRole());
         }
     }
+
+    public Long extractUserId(String token) {
+        var decodedJWT = jwtDecoder.decode(token);
+
+        if (!"refresh".equals(decodedJWT.getClaim("type").asString())) {
+            throw new JwtException("Invalid token type");
+        }
+
+       return Long.parseLong(decodedJWT.getSubject());
+    }
+
+    public static Long getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserPrincipleConfig user) {
+            return user.getUserId();
+        }
+        throw new AccessDeniedException("Invalid authentication");
+    }
+
+    public static List<? extends GrantedAuthority> getCurrentUserRole() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserPrincipleConfig user) {
+            return user.getAuthorities().stream()
+                    .toList();
+        }
+        throw new AccessDeniedException("Invalid authentication");
+    }
+
+
 
 
 }

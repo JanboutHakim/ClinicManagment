@@ -30,6 +30,6 @@ public class PatientDto   {
 
     private List<InsuranceCompanyDto> insuranceCompanies;
 
-    private List<Measurement> measurements;
+    private List<MeasurementDto> measurements;
 
 }

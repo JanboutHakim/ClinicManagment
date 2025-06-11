@@ -29,7 +29,6 @@ public class PatientDrugDto {
     @NotBlank
     @Size(max = 256)
     private String Dosage;
-
     private boolean isNew;
     @NotNull
     private int Frequency;

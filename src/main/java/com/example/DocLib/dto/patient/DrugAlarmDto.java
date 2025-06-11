@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
@@ -20,5 +21,5 @@ public class DrugAlarmDto {
     private String alarmMessage;
     @NotNull
     @FutureOrPresent
-    private LocalTime alarmTime;
+    private LocalDateTime alarmTime;
 }

@@ -1,10 +1,15 @@
 package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.*;
+import com.example.DocLib.dto.doctor.DoctorDto;
 import com.example.DocLib.dto.patient.*;
 import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.*;
+import com.example.DocLib.models.appointment.Appointment;
+import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.patient.*;
+import com.example.DocLib.repositories.AppointmentRepository;
+import com.example.DocLib.repositories.DoctorRepository;
 import com.example.DocLib.repositories.PatientRepository;
 import com.example.DocLib.services.interfaces.PatientServices;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,28 +27,32 @@ public class PatientServicesImp implements PatientServices {
     private final PatientRepository patientRepository;
     private final DrugServicesImp drugServiceImp;
     private final ModelMapper modelMapper;
+    private final AppointmentRepository appointmentRepository;
+    private final DoctorRepository doctorRepository;
 
 
     @Autowired
-    public PatientServicesImp(PatientRepository patientRepository, DrugServicesImp drugServiceImp, ModelMapper modelMapper) {
+    public PatientServicesImp(PatientRepository patientRepository, DrugServicesImp drugServiceImp, ModelMapper modelMapper, AppointmentRepository appointmentRepository, DoctorRepository doctorRepository) {
         this.patientRepository = patientRepository;
         this.drugServiceImp = drugServiceImp;
         this.modelMapper = modelMapper;
 
+        this.appointmentRepository = appointmentRepository;
+        this.doctorRepository = doctorRepository;
     }
 
     @Override
     public List<PatientDto> getAllPatients() {
         return patientRepository.findAll()
                 .stream()
-                .map(patient -> modelMapper.map(patient, PatientDto.class))
+                .map(this::convertPatientToDto)
                 .collect(Collectors.toList());
     }
     @Override
     public PatientDto getPatientById(Long id){
         return patientRepository.findById(id)
-                .map(patient -> modelMapper.map(patient,PatientDto.class))
-                .orElseThrow(() -> new EntityNotFoundException("Patient with id " + id + " not found"));
+                .map(this::convertPatientToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient with id " + id + " not found"));
     }
 
     @Override
@@ -201,13 +210,32 @@ public class PatientServicesImp implements PatientServices {
     public PatientDto updateHistoryRecord(Long id, PatientHistoryRecordDto historyDto) {
         return null;
     }
+    @Override
+    public List<DoctorDto> getPatientDoctors(Long patientId){
+        return appointmentRepository.findByPatient(getPatientEntity(patientId)).stream()
+                .map(this::getDoctorEntityFromAppointment)
+                .map(this::convertDoctorToDto)
+                .toList();
+
+
+    }
 
     public Patient getPatientEntity(Long id) {
         return patientRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor with ID " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient with ID " + id + " not found"));
     }
+
+    public Doctor getDoctorEntityFromAppointment(Appointment appointment) {
+        return doctorRepository.findById(appointment.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Patient with ID " + appointment.getId() + " not found"));
+    }
+
+
     private PatientDto convertPatientToDto(Patient patient){
         return modelMapper.map(patient,PatientDto.class);
+    }
+    private DoctorDto convertDoctorToDto(Doctor doctor){
+        return modelMapper.map(doctor,DoctorDto.class);
     }
 
 }

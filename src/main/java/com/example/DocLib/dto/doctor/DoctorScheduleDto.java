@@ -1,11 +1,13 @@
 package com.example.DocLib.dto.doctor;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 @Getter
 @Setter
@@ -20,9 +22,11 @@ public class DoctorScheduleDto {
         private DayOfWeek dayOfWeek;
 
         @NotNull(message = "Start Time cannot be null")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         private LocalTime startTime;
 
         @NotNull(message = "End Time cannot be null")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         private LocalTime endTime;
 
 

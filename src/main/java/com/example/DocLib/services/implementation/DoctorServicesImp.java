@@ -1,6 +1,7 @@
 package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.InsuranceCompanyDto;
+import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.InsuranceCompany;
 import com.example.DocLib.models.doctor.*;
 import com.example.DocLib.repositories.DoctorRepository;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,26 +23,24 @@ public class DoctorServicesImp implements DoctorServices {
 
     private final DoctorRepository doctorRepository;
     private final ModelMapper modelMapper;
-    @Qualifier("modelMapperWithId")
-    private final ModelMapper modelMapperWithoutId;
+
 
     @Autowired
-    public DoctorServicesImp(DoctorRepository doctorRepository, ModelMapper modelMapper, ModelMapper modelMapperWithoutId) {
+    public DoctorServicesImp(DoctorRepository doctorRepository, ModelMapper modelMapper) {
         this.doctorRepository = doctorRepository;
         this.modelMapper = modelMapper;
-        this.modelMapperWithoutId = modelMapperWithoutId;
     }
 
     // Basic doctor operations
     @Override
     public DoctorDto getDoctorById(Long id) {
-        return modelMapper.map(getDoctorEntity(id), DoctorDto.class);
+        return convertDoctorToDto(getDoctorEntity(id));
     }
 
     @Override
     public List<DoctorDto> getAllDoctors() {
         return doctorRepository.findAll().stream()
-                .map(doctor -> modelMapper.map(doctor, DoctorDto.class))
+                .map(this::convertDoctorToDto)
                 .collect(Collectors.toList());
     }
 
@@ -49,7 +49,19 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto updateAddress(Long id, String address) {
         Doctor doctor = getDoctorEntity(id);
         doctor.setAddress(address);
+        return convertDoctorToDto(doctor);
+    }
+
+    private DoctorDto convertDoctorToDto(Doctor doctor) {
         return modelMapper.map(doctor, DoctorDto.class);
+    }
+
+    @Override
+    @Transactional
+    public DoctorDto updateCheckupDuration(Long id, IntegerDto integerDto) {
+        Doctor doctor = getDoctorEntity(id);
+        doctor.setCheckupDurationInMinutes(integerDto.getNumber());
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -57,7 +69,7 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto updateYearsOfExperience(Long id, int years) {
         Doctor doctor = getDoctorEntity(id);
         doctor.setYearsOfExperience(years);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -65,7 +77,7 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto updateUnionMembershipNumber(Long id, String number) {
         Doctor doctor = getDoctorEntity(id);
         doctor.setUnionMembershipNumber(number);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     // Specialization operations
@@ -75,7 +87,7 @@ public class DoctorServicesImp implements DoctorServices {
         Doctor doctor = getDoctorEntity(doctorId);
         Specializations specialization = modelMapper.map(dto, Specializations.class);
         doctor.addSpecialization(specialization);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -83,7 +95,7 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto removeSpecialization(Long doctorId, Long specializationId) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.removeSpecializationById(specializationId);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -95,7 +107,7 @@ public class DoctorServicesImp implements DoctorServices {
             modelMapper.map(dto,specialization);
         });
 
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     // Experience operations
@@ -105,7 +117,7 @@ public class DoctorServicesImp implements DoctorServices {
         Doctor doctor = getDoctorEntity(doctorId);
         Experience experience = modelMapper.map(dto, Experience.class);
         doctor.addExperience(experience);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -115,7 +127,7 @@ public class DoctorServicesImp implements DoctorServices {
 
         doctor.removeExperienceById(experienceId);
 
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -125,7 +137,7 @@ public class DoctorServicesImp implements DoctorServices {
 
         doctor.updateExperience(dto.getId(), exp -> {modelMapper.map(dto,exp);});
 
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
 
@@ -136,7 +148,7 @@ public class DoctorServicesImp implements DoctorServices {
         Doctor doctor = getDoctorEntity(doctorId);
         ScientificBackground background = modelMapper.map(dto, ScientificBackground.class);
         doctor.addScientificBackground(background);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -144,7 +156,7 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto removeScientificBackground(Long doctorId, Long backgroundId) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.removeScientificBackgroundById(backgroundId);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -154,7 +166,7 @@ public class DoctorServicesImp implements DoctorServices {
         doctor.updateScientificBackground(dto.getId(), scientificBackground -> {
             modelMapper.map(dto,scientificBackground);
         });
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     // Service operations
@@ -164,7 +176,7 @@ public class DoctorServicesImp implements DoctorServices {
         Doctor doctor = getDoctorEntity(doctorId);
         DoctorService service = modelMapper.map(dto, DoctorService.class);
         doctor.addService(service);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -172,7 +184,7 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto removeService(Long doctorId, Long serviceId) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.removeServiceById(serviceId);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -182,7 +194,7 @@ public class DoctorServicesImp implements DoctorServices {
         doctor.updateExperience(dto.getId(), analyse -> {
             modelMapper.map(dto, analyse);
         });
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     // Schedule operations
@@ -192,7 +204,7 @@ public class DoctorServicesImp implements DoctorServices {
         Doctor doctor = getDoctorEntity(doctorId);
         DoctorSchedule schedule = modelMapper.map(dto, DoctorSchedule.class);
         doctor.addDoctorSchedule(schedule);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -200,7 +212,7 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto removeSchedule(Long doctorId, Long scheduleId) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.removeScheduleById(scheduleId);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -210,7 +222,7 @@ public class DoctorServicesImp implements DoctorServices {
         doctor.updateSchedule(dto.getDoctorId(), schedule -> {
             modelMapper.map(schedule, dto);
         });
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     // Holiday Schedule operations
@@ -220,7 +232,7 @@ public class DoctorServicesImp implements DoctorServices {
         Doctor doctor = getDoctorEntity(doctorId);
         DoctorHolidaySchedule holidaySchedule = modelMapper.map(dto, DoctorHolidaySchedule.class);
         doctor.addDoctorHolidaySchedule(holidaySchedule);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -228,7 +240,7 @@ public class DoctorServicesImp implements DoctorServices {
     public DoctorDto removeHolidaySchedule(Long doctorId, Long holidayScheduleId) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.removeHolidayScheduleById(holidayScheduleId);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -238,7 +250,7 @@ public class DoctorServicesImp implements DoctorServices {
         doctor.updateHolidaySchedule(dto.getDoctorId(), holidaySchedule -> {
             modelMapper.map(dto, holidaySchedule);
         });
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     // Insurance Company operations
@@ -248,7 +260,7 @@ public class DoctorServicesImp implements DoctorServices {
         Doctor doctor = getDoctorEntity(doctorId);
         InsuranceCompany company = modelMapper.map(dto, InsuranceCompany.class);
         doctor.addInsuranceCompany(company);
-        return modelMapper.map(doctor, DoctorDto.class);
+        return convertDoctorToDto(doctor);
     }
 
     @Override
@@ -314,8 +326,12 @@ public class DoctorServicesImp implements DoctorServices {
                 .collect(Collectors.toList());
     }
 
+    public List<DoctorHolidaySchedule> findHolidayScheduleByDate(Long doctorId, LocalDateTime start){
+        return doctorRepository.findHolidayScheduleByDate(doctorId,start);
+    }
+
     public Doctor getDoctorEntity(Long id) {
         return doctorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Doctor with ID " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor with ID " + id + " not found"));
     }
 }

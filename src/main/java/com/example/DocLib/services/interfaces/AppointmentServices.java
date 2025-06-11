@@ -9,7 +9,7 @@ import com.example.DocLib.enums.AppointmentStatus;
 
 public interface AppointmentServices {
         // Core CRUD Operations
-        AppointmentDto createAppointment(AppointmentDto appointmentDto);
+        AppointmentDto addAppointment(AppointmentDto appointmentDto);
         AppointmentDto getAppointmentById(Long appointmentId);
         void deleteAppointment(Long appointmentId);
 
@@ -31,6 +31,7 @@ public interface AppointmentServices {
         List<AppointmentDto> getUpcomingAppointmentsForDoctor(Long doctorId);
 
         // Availability Checking
+        boolean isPatientAvailable(Long patientId, LocalDateTime startTime);
         boolean isDoctorAvailable(Long doctorId, LocalDateTime dateTime);
         boolean isDoctorOnVacation(Long doctorId, LocalDateTime startTime);
         List<LocalDateTime> getDoctorAvailableSlots(Long doctorId);

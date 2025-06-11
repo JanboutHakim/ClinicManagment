@@ -28,7 +28,8 @@ public class Patient  {
 
     @OneToOne
     @MapsId  // This tells Hibernate to use the User's PK as Doctor's PK
-    @JoinColumn(name = "id") // Foreign key column and PK column in Doctor table
+    @JoinColumn(name = "id")// Foreign key column and PK column in Doctor table
+
     private User user;
 
 

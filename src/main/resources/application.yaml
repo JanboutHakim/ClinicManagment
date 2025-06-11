@@ -1,6 +1,7 @@
 spring:
   application:
     name: DocLib
+    address: 0.0.0.0
   datasource:
     url: jdbc:mysql://localhost:3306/doclib
     username: root

@@ -14,7 +14,7 @@ public interface DoctorServices {
 
         // Basic Field Updates
         DoctorDto updateAddress(Long id, String address);
-
+        DoctorDto updateCheckupDuration(Long id,IntegerDto integerDto);
         DoctorDto updateYearsOfExperience(Long id, int years);
         DoctorDto updateUnionMembershipNumber(Long id, String number);
 

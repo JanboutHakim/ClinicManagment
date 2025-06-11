@@ -1,6 +1,7 @@
 package com.example.DocLib.services.interfaces;
 
 import com.example.DocLib.dto.*;
+import com.example.DocLib.dto.doctor.DoctorDto;
 import com.example.DocLib.dto.patient.*;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public interface PatientServices {
         PatientDto addMeasurement(Long id, MeasurementDto measurement);
         PatientDto deleteMeasurement(Long id, Long measurementId);
         PatientDto updateMeasurement(Long id, MeasurementDto measurementDto);
+        List<DoctorDto> getPatientDoctors(Long patientId);
 
         // History Records
         List<PatientHistoryRecordDto> getAllHistoryRecords(Long id);

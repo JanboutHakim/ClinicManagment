@@ -48,6 +48,7 @@ public class UserServicesImp {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
+
     @Transactional
     public UserDto updateUser(Long id, UserDto userDto) {
         Optional<User> userOptional = userRepository.findById(id);
@@ -59,5 +60,7 @@ public class UserServicesImp {
             throw new NoSuchElementException("User not found with id: " + id);
         }
     }
+
+
 
 }

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
@@ -19,14 +20,14 @@ public class DoctorHolidayScheduleDto {
 
     @PastOrPresent(message = "Holiday Date should be in the past or present.")
     @NotNull(message = "Holiday Date is required.")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate holidayDate;
 
     @FutureOrPresent
-    private LocalTime startTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDateTime startTime;
 
     @Future
-    private LocalTime endTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDateTime endTime;
 
     private boolean allDay;
 
