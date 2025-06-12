@@ -18,11 +18,11 @@ import java.util.List;
  * <p>All routes require the authenticated user to match the {@code patientId} in the path.
  * If the authenticated user ID does not match, an {@link AccessDeniedException} is thrown.</p>
  *
- * <p>Base path: {@code /patient}</p>
+ * <p>Base path: {@code /patients}</p>
  * @author Janbout Hakim
  **/
 @RestController
-@RequestMapping("/patient")
+@RequestMapping("/patients")
 public class PatientController {
 
     private final PatientServicesImp patientServicesImp;
@@ -39,7 +39,7 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @DeleteMapping("/{patientId}/Measurement/{measurementId}")
+    @DeleteMapping("/{patientId}/measurements/{measurementId}")
     public ResponseEntity<PatientDto> deleteMeasurement(@PathVariable Long patientId, @PathVariable Long measurementId) {
         checkAuthenticatedUser(patientId);
         PatientDto patientDto = patientServicesImp.deleteMeasurement(patientId, measurementId);
@@ -60,7 +60,7 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/Drug")
+    @PostMapping("/{patientId}/drugs")
     public ResponseEntity<PatientDto> updateDrug(@PathVariable Long patientId, @RequestBody @Valid PatientDrugDto patientDrugDto) {
         checkAuthenticatedUser(patientId);
         PatientDto patientDto = patientServicesImp.updateDrug(patientId, patientDrugDto);
@@ -75,7 +75,7 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/Analyse")
+    @PostMapping("/{patientId}/analyses")
     public ResponseEntity<PatientDto> updateAnalyse(@PathVariable Long patientId, @RequestBody @Valid AnalyseDto analyseDto) {
         checkAuthenticatedUser(patientId);
         PatientDto patientDto = patientServicesImp.updateAnalyse(patientId, analyseDto);
@@ -91,7 +91,7 @@ public class PatientController {
      * @return Updated patient information (currently returns empty DTO).
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/InsuranceCompany")
+    @PostMapping("/{patientId}/insurance-company")
     public ResponseEntity<PatientDto> updateInsuranceCompany(@PathVariable Long patientId, @RequestBody @Valid InsuranceCompanyDto insuranceCompanyDto) {
         checkAuthenticatedUser(patientId);
         // Currently not implemented
@@ -106,7 +106,7 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/getAllMeasurement")
+    @PostMapping("/{patientId}/measurements")
     public ResponseEntity<PatientDto> updateMeasurement(@PathVariable Long patientId, @RequestBody @Valid MeasurementDto measurementDto) {
         checkAuthenticatedUser(patientId);
         PatientDto patientDto = patientServicesImp.updateMeasurement(patientId, measurementDto);
@@ -121,7 +121,7 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/updateHistory")
+    @PostMapping("/{patientId}/history")
     public ResponseEntity<PatientDto> updateHistoryRecord(@PathVariable Long patientId, @RequestBody @Valid PatientHistoryRecordDto historyDto) {
         checkAuthenticatedUser(patientId);
         PatientDto patientDto = patientServicesImp.updateHistoryRecord(patientId, historyDto);
