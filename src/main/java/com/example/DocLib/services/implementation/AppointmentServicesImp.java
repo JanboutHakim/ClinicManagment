@@ -63,6 +63,10 @@ public class AppointmentServicesImp implements AppointmentServices {
     public AppointmentDto addAppointment(AppointmentDto appointmentDto) {
         appointmentDto.setStatus(AppointmentStatus.ON_HOLD);
 
+        LocalDateTime calculatedEndTime = appointmentDto.getStartTime()
+                .plusMinutes(getCachedCheckupDuration(appointmentDto.getDoctorId()));
+        appointmentDto.setEndTime(calculatedEndTime);
+
         if (!isDoctorAvailable(appointmentDto.getDoctorId(), appointmentDto.getStartTime()) ||
                 isDoctorOnVacation(appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
             throw new AppointmentNotAvailableAtThisTime("Doctor is not available at the requested time.");
@@ -99,6 +103,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         Appointment appointment = getAppointmentEntity(appointmentId);
         LocalDateTime newEndTime = appointmentDto.getStartTime()
                 .plusMinutes(getCachedCheckupDuration(appointmentDto.getDoctorId()));
+        appointmentDto.setEndTime(newEndTime);
 
         if (!isDoctorAvailable(appointmentDto.getDoctorId(), appointmentDto.getStartTime()) ||
                 isDoctorOnVacation(appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
