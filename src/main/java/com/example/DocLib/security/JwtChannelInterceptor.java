@@ -27,11 +27,14 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                         var principal = jwtPrincipleConverter.convert(jwt);
                         var authentication = new UserPrincipleAuthenticationToken(principal);
                         accessor.setUser(authentication);
+                        return message;
                     }
                 } catch (Exception ignored) {
                     // ignore invalid token
                 }
             }
+            // Reject connection if token is missing or invalid
+            return null;
         }
         return message;
     }

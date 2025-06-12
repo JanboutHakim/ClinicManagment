@@ -28,12 +28,18 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                     var principal = jwtPrincipleConverter.convert(jwt);
                     var authentication = new UserPrincipleAuthenticationToken(principal);
                     attributes.put("principal", authentication);
+                    return true;
                 }
             } catch (Exception ignored) {
-                // ignore invalid token; handshake proceeds without authentication
+                // ignore invalid token
             }
         }
-        return true;
+
+        // reject handshake if no valid token
+        if (response instanceof org.springframework.http.server.ServletServerHttpResponse httpResponse) {
+            httpResponse.getServletResponse().setStatus(401);
+        }
+        return false;
     }
 
     @Override

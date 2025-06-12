@@ -43,4 +43,21 @@ class JwtHandshakeInterceptorTest {
         assertTrue(result);
         assertTrue(attributes.get("principal") instanceof UserPrincipleAuthenticationToken);
     }
+
+    @Test
+    void handshakeRejectedWithoutToken() {
+        JwtDecoder decoder = mock(JwtDecoder.class);
+        JwtPrincipleConverter converter = mock(JwtPrincipleConverter.class);
+
+        JwtHandshakeInterceptor interceptor = new JwtHandshakeInterceptor(decoder, converter);
+        MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+        ServletServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+        MockHttpServletResponse servletResponse = new MockHttpServletResponse();
+        ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
+        HashMap<String, Object> attributes = new HashMap<>();
+
+        boolean result = interceptor.beforeHandshake(request, response, null, attributes);
+        assertFalse(result);
+        assertEquals(401, servletResponse.getStatus());
+    }
 }
