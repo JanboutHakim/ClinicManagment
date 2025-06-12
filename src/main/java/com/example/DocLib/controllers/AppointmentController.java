@@ -64,7 +64,7 @@ public class AppointmentController {
      */
     @PostMapping("/{id}")
     public ResponseEntity<AppointmentDto> addAppointment(@PathVariable Long id,@Valid @RequestBody AppointmentDto appointmentDto) {
-    //    checkAuthenticatedUser(id);
+        checkAuthenticatedUser(id);
         AppointmentDto createdAppointment = appointmentServicesImp.addAppointment(appointmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
     }
