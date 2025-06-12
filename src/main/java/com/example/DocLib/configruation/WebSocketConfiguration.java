@@ -13,9 +13,9 @@ import java.net.http.WebSocket;
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/patient", "/doctor","all","appointments"); // Allow /queue for point-to-point messaging
-        config.setApplicationDestinationPrefixes("/ws");
-        config.setUserDestinationPrefix("/app");
+        config.enableSimpleBroker("/queue", "/topic");
+        config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user"); // Important for /user/queue/...
     }
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {

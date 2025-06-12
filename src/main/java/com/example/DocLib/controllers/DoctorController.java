@@ -327,7 +327,7 @@ public class DoctorController {
     /**
      *
      */
-    @PostMapping("/{doctorId}/schedules/delete/{doctorScheduleId}")
+    @DeleteMapping("/{doctorId}/schedules/{doctorScheduleId}")
     public ResponseEntity<DoctorDto> removeSchedule(@PathVariable Long doctorId, @PathVariable Long doctorScheduleId) {
         checkAuthenticatedUser(doctorId);
         DoctorDto updatedDoctor = doctorServicesImp.removeSchedule(doctorId, doctorScheduleId);

@@ -62,9 +62,9 @@ public class AppointmentController {
      * @param appointmentDto The AppointmentDto object containing appointment details.
      * @return ResponseEntity with the created AppointmentDto object and HTTP status code 201 (CREATED).
      */
-    @PostMapping("/{id}/")
+    @PostMapping("/{id}")
     public ResponseEntity<AppointmentDto> addAppointment(@PathVariable Long id,@Valid @RequestBody AppointmentDto appointmentDto) {
-        checkAuthenticatedUser(id);
+    //    checkAuthenticatedUser(id);
         AppointmentDto createdAppointment = appointmentServicesImp.addAppointment(appointmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
     }

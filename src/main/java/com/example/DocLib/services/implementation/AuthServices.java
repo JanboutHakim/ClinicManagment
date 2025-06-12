@@ -25,8 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.util.List;
-
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +53,7 @@ public class AuthServices {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        var roles = List.of(user.getRole().toString());
+        var roles = List.of("ROLE_" + user.getRole().toString());
         var newAccessToken = jwtIssuer.issueAccessToken(userId, username, roles);
         var newRefreshToken = jwtIssuer.issueRefreshToken(userId, username);
 
@@ -77,15 +77,21 @@ public class AuthServices {
                     .map(GrantedAuthority::getAuthority)
                     .toList();
 
+            System.out.println("Login successful for user: " + username + " with roles: " + roles);
+
             var token = jwtIssuer.issueAccessToken(principal.getUserId(), principal.getUsername(), roles);
             var refreshToken = jwtIssuer.issueRefreshToken(principal.getUserId(), principal.getUsername());
+
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             return TokenResponse.builder()
                     .accessToken(token)
                     .refreshToken(refreshToken)
                     .message("Login successful")
                     .success(true)
-                    .user(modelMapper.map(userRepository.findByUsername(username), UserDto.class))
+                    .expiresIn(jwtProperties.getAccessTokenExpirationMs())
+                    .user(modelMapper.map(user, UserDto.class))
                     .build();
 
         } catch (BadCredentialsException e) {
@@ -101,6 +107,7 @@ public class AuthServices {
                     .build();
 
         } catch (Exception e) {
+            System.err.println("Authentication error: " + e.getMessage());
             return TokenResponse.builder()
                     .message("Authentication failed")
                     .success(false)
@@ -114,6 +121,7 @@ public class AuthServices {
 
         User user = modelMapper.map(userDto, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(LocalDate.now());
 
         linkRoleSpecificEntity(userDto, user);
 
@@ -121,7 +129,6 @@ public class AuthServices {
 
         return modelMapper.map(savedUser, UserDto.class);
     }
-
 
     private void validateUserDto(UserDto userDto) {
         if (userDto.getDoctor() != null && userDto.getPatient() != null) {
@@ -132,17 +139,19 @@ public class AuthServices {
     private void linkRoleSpecificEntity(UserDto userDto, User user) {
         switch (userDto.getRole()) {
             case DOCTOR -> {
-                Doctor doctor = modelMapper.map(userDto.getDoctor(), Doctor.class);
+                Doctor doctor = userDto.getDoctor() != null ? 
+                    modelMapper.map(userDto.getDoctor(), Doctor.class) : new Doctor();
                 doctor.setUser(user);
                 user.setDoctor(doctor);
             }
             case PATIENT -> {
-                Patient patient = modelMapper.map(userDto.getPatient(), Patient.class);
+                Patient patient = userDto.getPatient() != null ? 
+                    modelMapper.map(userDto.getPatient(), Patient.class) : new Patient();
                 patient.setUser(user);
                 user.setPatient(patient);
             }
             case ADMIN -> {
-
+                // Admin doesn't need additional entity
             }
             default -> throw new IllegalArgumentException("Unsupported role: " + userDto.getRole());
         }
@@ -151,11 +160,11 @@ public class AuthServices {
     public Long extractUserId(String token) {
         var decodedJWT = jwtDecoder.decode(token);
 
-        if (!"refresh".equals(decodedJWT.getClaim("type").asString())) {
+        if (!"access".equals(decodedJWT.getClaim("type").asString())) {
             throw new JwtException("Invalid token type");
         }
 
-       return Long.parseLong(decodedJWT.getSubject());
+        return Long.parseLong(decodedJWT.getSubject());
     }
 
     public static Long getCurrentUserId() {
@@ -174,8 +183,4 @@ public class AuthServices {
         }
         throw new AccessDeniedException("Invalid authentication");
     }
-
-
-
-
 }

@@ -1,17 +1,27 @@
 spring:
   application:
     name: DocLib
-    address: 0.0.0.0
+
   datasource:
     url: jdbc:mysql://localhost:3306/doclib
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+
   security:
     jwt:
       secret-key: verysecretkeyohmygodwhyitissosecretdonttellanybodypleaseee
+
+logging:
+  level:
+    org:
+      springframework:
+        messaging: DEBUG
+        web:
+          socket: DEBUG

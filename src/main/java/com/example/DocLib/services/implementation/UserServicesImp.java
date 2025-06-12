@@ -1,6 +1,7 @@
 package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.UserDto;
+import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.User;
 import com.example.DocLib.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -61,6 +62,14 @@ public class UserServicesImp {
         }
     }
 
+    public UserDto getUser(Long userId){
+        return convertToDto(userRepository.findById(userId)
+                .orElseThrow(()->new ResourceNotFoundException("User Not Found")));
+    }
+
+    public UserDto convertToDto(User user){
+        return modelMapper.map(user,UserDto.class);
+    }
 
 
 }
