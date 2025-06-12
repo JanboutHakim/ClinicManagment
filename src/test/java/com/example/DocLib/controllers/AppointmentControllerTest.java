@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -59,5 +60,61 @@ class AppointmentControllerTest {
 
         assertSame(dto, result.getBody());
         verify(service).cancelAppointmentByClinic(3L, "r");
+    }
+
+    @Test
+    void addAppointmentDelegatesToService() {
+        AppointmentServicesImp service = mock(AppointmentServicesImp.class);
+        AppointmentController controller = new AppointmentController(service);
+        setAuth(5L, "ROLE_PATIENT");
+
+        AppointmentDto dto = new AppointmentDto();
+        when(service.addAppointment(dto)).thenReturn(dto);
+
+        ResponseEntity<AppointmentDto> result = controller.addAppointment(5L, dto);
+
+        assertSame(dto, result.getBody());
+        verify(service).addAppointment(dto);
+    }
+
+    @Test
+    void deleteAppointmentInvokesService() {
+        AppointmentServicesImp service = mock(AppointmentServicesImp.class);
+        AppointmentController controller = new AppointmentController(service);
+        setAuth(4L, "ROLE_PATIENT");
+
+        ResponseEntity<Void> result = controller.deleteAppointment(7L, 4L);
+
+        assertEquals(204, result.getStatusCode().value());
+        verify(service).deleteAppointment(7L);
+    }
+
+    @Test
+    void getAppointmentsByDoctorReturnsList() {
+        AppointmentServicesImp service = mock(AppointmentServicesImp.class);
+        AppointmentController controller = new AppointmentController(service);
+        setAuth(6L, "ROLE_PATIENT");
+
+        when(service.getAppointmentsByDoctor(3L)).thenReturn(Collections.emptyList());
+
+        ResponseEntity<List<AppointmentDto>> result = controller.getAppointmentsByDoctor(3L, 6L);
+
+        assertNotNull(result.getBody());
+        verify(service).getAppointmentsByDoctor(3L);
+    }
+
+    @Test
+    void confirmAppointmentDelegatesToService() {
+        AppointmentServicesImp service = mock(AppointmentServicesImp.class);
+        AppointmentController controller = new AppointmentController(service);
+        setAuth(8L, "ROLE_DOCTOR");
+
+        AppointmentDto dto = new AppointmentDto();
+        when(service.confirmAppointment(9L)).thenReturn(dto);
+
+        ResponseEntity<AppointmentDto> result = controller.confirmAppointment(9L, 8L);
+
+        assertSame(dto, result.getBody());
+        verify(service).confirmAppointment(9L);
     }
 }
