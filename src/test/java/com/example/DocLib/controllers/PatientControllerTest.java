@@ -3,6 +3,8 @@ package com.example.DocLib.controllers;
 import com.example.DocLib.configruation.UserPrincipleConfig;
 import com.example.DocLib.dto.doctor.DoctorDto;
 import com.example.DocLib.dto.patient.PatientDto;
+import com.example.DocLib.dto.patient.PatientDrugDto;
+import com.example.DocLib.dto.patient.PatientHistoryRecordDto;
 import com.example.DocLib.security.UserPrincipleAuthenticationToken;
 import com.example.DocLib.services.implementation.PatientServicesImp;
 import org.junit.jupiter.api.AfterEach;
@@ -61,5 +63,37 @@ class PatientControllerTest {
 
         assertEquals(2, result.getBody().size());
         verify(service).getPatientDoctors(3L);
+    }
+
+    @Test
+    void updateDrugSetsIdAndCallsService() {
+        PatientServicesImp service = mock(PatientServicesImp.class);
+        PatientController controller = new PatientController(service);
+        setAuth(4L);
+
+        PatientDrugDto drugDto = new PatientDrugDto();
+        when(service.updateDrug(4L, drugDto)).thenReturn(new PatientDto());
+
+        ResponseEntity<PatientDto> result = controller.updateDrug(4L, 9L, drugDto);
+
+        assertNotNull(result.getBody());
+        assertEquals(9L, drugDto.getId());
+        verify(service).updateDrug(4L, drugDto);
+    }
+
+    @Test
+    void updateHistoryRecordDelegatesToService() {
+        PatientServicesImp service = mock(PatientServicesImp.class);
+        PatientController controller = new PatientController(service);
+        setAuth(5L);
+
+        PatientHistoryRecordDto dto = new PatientHistoryRecordDto();
+        when(service.updateHistoryRecord(5L, dto)).thenReturn(new PatientDto());
+
+        ResponseEntity<PatientDto> result = controller.updateHistoryRecord(5L, 11L, dto);
+
+        assertNotNull(result.getBody());
+        assertEquals(11L, dto.getId());
+        verify(service).updateHistoryRecord(5L, dto);
     }
 }
