@@ -38,6 +38,15 @@ public class AppointmentServicesImp implements AppointmentServices {
     private final UserServicesImp userServicesImp;
     private static final long REMINDER_THRESHOLD_MINUTES = 60;
 
+    private void sendNotification(Long userId, String content, AppointmentDto dto) {
+        AppointmentNotificationDto notification = new AppointmentNotificationDto(content, dto);
+        messagingTemplate.convertAndSendToUser(
+                userServicesImp.getUser(userId).getUsername(),
+                "/queue/appointments",
+                notification
+        );
+    }
+
     @Autowired
     public AppointmentServicesImp(ModelMapper modelMapper, AppointmentRepository appointmentRepository, SimpMessagingTemplate messagingTemplate, DoctorServicesImp doctorServicesImp, PatientServicesImp patientServicesImp, UserServicesImp userServicesImp) {
         this.modelMapper = modelMapper;
@@ -62,16 +71,10 @@ public class AppointmentServicesImp implements AppointmentServices {
         }
 
         Appointment appointment = appointmentRepository.save(modelMapper.map(appointmentDto, Appointment.class));
-        messagingTemplate.convertAndSendToUser(
-                userServicesImp.getUser(appointmentDto.getDoctorId()).getUsername(), // must match authenticated username
-                "/queue/appointments",appointmentDto);
-        messagingTemplate.convertAndSendToUser(
-                userServicesImp.getUser(appointmentDto.getDoctorId()).getUsername(),
-                "/queue/appointments",
-                Map.of("content", "New appointment added!")
-        );
-        System.out.println(userServicesImp.getUser(appointmentDto.getDoctorId()).getUsername());
-        return convertAppointmentToDto(appointment);
+        AppointmentDto dto = convertAppointmentToDto(appointment);
+        sendNotification(appointmentDto.getDoctorId(), "New appointment added", dto);
+        sendNotification(appointmentDto.getPatientId(), "Appointment booked", dto);
+        return dto;
     }
 
     @Override
@@ -82,7 +85,11 @@ public class AppointmentServicesImp implements AppointmentServices {
     @Override
     @Transactional
     public void deleteAppointment(Long appointmentId) {
+        Appointment appointment = getAppointmentEntity(appointmentId);
         appointmentRepository.deleteById(appointmentId);
+        AppointmentDto dto = convertAppointmentToDto(appointment);
+        sendNotification(appointment.getDoctor().getId(), "Appointment deleted", dto);
+        sendNotification(appointment.getPatient().getId(), "Appointment deleted", dto);
     }
 
     @Override
@@ -104,8 +111,10 @@ public class AppointmentServicesImp implements AppointmentServices {
         appointment.setStatus(AppointmentStatus.RESCHEDULED);
         appointment.setUpdatedAt(LocalDateTime.now());
         appointment = appointmentRepository.save(appointment);
-
-        return convertAppointmentToDto(appointment);
+        AppointmentDto dto = convertAppointmentToDto(appointment);
+        sendNotification(appointment.getDoctor().getId(), "Appointment rescheduled", dto);
+        sendNotification(appointment.getPatient().getId(), "Appointment rescheduled", dto);
+        return dto;
     }
 
     @Override
@@ -115,7 +124,9 @@ public class AppointmentServicesImp implements AppointmentServices {
         Appointment appointment = getAppointmentEntity(appointmentId);
         appointment.setCancellationReason(cancellationReason);
         appointment.setStatus(AppointmentStatus.CANCELLED_BY_CLINIC);
-        return convertAppointmentToDto(appointment);
+        AppointmentDto dto = convertAppointmentToDto(appointment);
+        sendNotification(appointment.getPatient().getId(), "Appointment cancelled by clinic", dto);
+        return dto;
     }
 
     @Override
@@ -125,7 +136,9 @@ public class AppointmentServicesImp implements AppointmentServices {
         Appointment appointment = getAppointmentEntity(appointmentId);
         appointment.setCancellationReason(cancellationReason);
         appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
-        return convertAppointmentToDto(appointment);
+        AppointmentDto dto = convertAppointmentToDto(appointment);
+        sendNotification(appointment.getDoctor().getId(), "Appointment cancelled by patient", dto);
+        return dto;
     }
 
     @Override
@@ -133,7 +146,9 @@ public class AppointmentServicesImp implements AppointmentServices {
     public AppointmentDto confirmAppointment(Long appointmentId) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         appointment.setStatus(AppointmentStatus.CONFIRMED);
-        return convertAppointmentToDto(appointment);
+        AppointmentDto dto = convertAppointmentToDto(appointment);
+        sendNotification(appointment.getPatient().getId(), "Appointment confirmed", dto);
+        return dto;
     }
 
     @Override
@@ -142,7 +157,10 @@ public class AppointmentServicesImp implements AppointmentServices {
         appointment.setStatus(status);
         appointment.setUpdatedAt(LocalDateTime.now());
         appointment = appointmentRepository.save(appointment);
-        return convertAppointmentToDto(appointment);
+        AppointmentDto dto = convertAppointmentToDto(appointment);
+        sendNotification(appointment.getDoctor().getId(), "Appointment status updated", dto);
+        sendNotification(appointment.getPatient().getId(), "Appointment status updated", dto);
+        return dto;
     }
 
     @Override
