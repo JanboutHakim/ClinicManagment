@@ -1,122 +1,64 @@
 package com.example.DocLib.services.implementation;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.DocLib.dto.doctor.DoctorDto;
+import com.example.DocLib.enums.AppointmentStatus;
+import com.example.DocLib.repositories.AppointmentRepository;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class AppointmentServicesImpTest {
 
-    @BeforeEach
-    void setUp() {
-    }
+    @Test
+    void isPatientAvailableChecksRepository() {
+        AppointmentRepository repo = mock(AppointmentRepository.class);
+        AppointmentServicesImp service = new AppointmentServicesImp(new ModelMapper(), repo,
+                mock(SimpMessagingTemplate.class), mock(DoctorServicesImp.class),
+                mock(PatientServicesImp.class), mock(UserServicesImp.class));
 
-    @AfterEach
-    void tearDown() {
+        LocalDateTime time = LocalDateTime.now();
+        when(repo.existsByPatientIdAndStartTime(2L, time)).thenReturn(false);
+
+        assertTrue(service.isPatientAvailable(2L, time));
+        verify(repo).existsByPatientIdAndStartTime(2L, time);
     }
 
     @Test
-    void addAppointment() {
+    void isDoctorAvailableChecksOverlaps() {
+        AppointmentRepository repo = mock(AppointmentRepository.class);
+        DoctorServicesImp doctor = mock(DoctorServicesImp.class);
+        AppointmentServicesImp service = new AppointmentServicesImp(new ModelMapper(), repo,
+                mock(SimpMessagingTemplate.class), doctor,
+                mock(PatientServicesImp.class), mock(UserServicesImp.class));
+
+        LocalDateTime start = LocalDateTime.now();
+        DoctorDto dto = new DoctorDto();
+        dto.setCheckupDurationInMinutes(30);
+        when(doctor.getDoctorById(1L)).thenReturn(dto);
+        when(repo.findOverlappingAppointments(eq(1L), eq(start), eq(start.plusMinutes(30)),
+                anyList())).thenReturn(Collections.emptyList());
+
+        assertTrue(service.isDoctorAvailable(1L, start));
     }
 
     @Test
-    void getAppointmentById() {
-    }
+    void getCachedCheckupDurationReturnsFromDoctorService() {
+        AppointmentRepository repo = mock(AppointmentRepository.class);
+        DoctorServicesImp doctor = mock(DoctorServicesImp.class);
+        DoctorDto dto = new DoctorDto();
+        dto.setCheckupDurationInMinutes(20);
+        when(doctor.getDoctorById(1L)).thenReturn(dto);
 
-    @Test
-    void deleteAppointment() {
-    }
+        AppointmentServicesImp service = new AppointmentServicesImp(new ModelMapper(), repo,
+                mock(SimpMessagingTemplate.class), doctor,
+                mock(PatientServicesImp.class), mock(UserServicesImp.class));
 
-    @Test
-    void rescheduleAppointment() {
-    }
-
-    @Test
-    void cancelAppointmentByClinic() {
-    }
-
-    @Test
-    void cancelAppointmentByPatient() {
-    }
-
-    @Test
-    void confirmAppointment() {
-    }
-
-    @Test
-    void updateAppointmentStatus() {
-    }
-
-    @Test
-    void getAppointmentsByDoctor() {
-    }
-
-    @Test
-    void getAppointmentsByPatient() {
-    }
-
-    @Test
-    void getAppointmentsByDateRange() {
-    }
-
-    @Test
-    void getUpcomingAppointmentsForDoctor() {
-    }
-
-    @Test
-    void getUpcomingAppointmentsForPatient() {
-    }
-
-    @Test
-    void isDoctorAvailable() {
-    }
-
-    @Test
-    void isDoctorOnVacation() {
-    }
-
-    @Test
-    void isPatientAvailable() {
-    }
-
-    @Test
-    void getDoctorAvailableSlots() {
-    }
-
-    @Test
-    void getDoctorWeeklySchedule() {
-    }
-
-    @Test
-    void getAppointmentsByStatus() {
-    }
-
-    @Test
-    void checkUpcomingAppointments() {
-    }
-
-    @Test
-    void sendAppointmentReminders() {
-    }
-
-    @Test
-    void getCancelledAppointments() {
-    }
-
-    @Test
-    void getAppointmentCountByStatus() {
-    }
-
-    @Test
-    void getDoctorCancellationRate() {
-    }
-
-    @Test
-    void getPatientHistory() {
-    }
-
-    @Test
-    void getCachedCheckupDuration() {
+        assertEquals(20, service.getCachedCheckupDuration(1L));
     }
 }
