@@ -62,6 +62,9 @@ public class AppointmentServicesImp implements AppointmentServices {
     @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId + '-' + #appointmentDto.startTime")
     public AppointmentDto addAppointment(AppointmentDto appointmentDto) {
         appointmentDto.setStatus(AppointmentStatus.ON_HOLD);
+        appointmentDto.setEndTime(
+                appointmentDto.getStartTime()
+                        .plusMinutes(getCachedCheckupDuration(appointmentDto.getDoctorId())));
 
         if (!isDoctorAvailable(appointmentDto.getDoctorId(), appointmentDto.getStartTime()) ||
                 isDoctorOnVacation(appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
@@ -107,6 +110,7 @@ public class AppointmentServicesImp implements AppointmentServices {
             throw new AppointmentNotAvailableAtThisTime("Patient is not available at the requested time.");
         }
 
+        appointmentDto.setEndTime(newEndTime);
         modelMapper.map(appointmentDto, appointment);
         appointment.setStatus(AppointmentStatus.RESCHEDULED);
         appointment.setUpdatedAt(LocalDateTime.now());
