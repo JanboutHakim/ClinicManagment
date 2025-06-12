@@ -60,9 +60,12 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/drugs")
-    public ResponseEntity<PatientDto> updateDrug(@PathVariable Long patientId, @RequestBody @Valid PatientDrugDto patientDrugDto) {
+    @PutMapping("/{patientId}/drugs/{drugId}")
+    public ResponseEntity<PatientDto> updateDrug(@PathVariable Long patientId,
+                                                 @PathVariable Long drugId,
+                                                 @RequestBody @Valid PatientDrugDto patientDrugDto) {
         checkAuthenticatedUser(patientId);
+        patientDrugDto.setId(drugId);
         PatientDto patientDto = patientServicesImp.updateDrug(patientId, patientDrugDto);
         return ResponseEntity.ok(patientDto);
     }
@@ -75,9 +78,12 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/analyses")
-    public ResponseEntity<PatientDto> updateAnalyse(@PathVariable Long patientId, @RequestBody @Valid AnalyseDto analyseDto) {
+    @PutMapping("/{patientId}/analyses/{analyseId}")
+    public ResponseEntity<PatientDto> updateAnalyse(@PathVariable Long patientId,
+                                                    @PathVariable Long analyseId,
+                                                    @RequestBody @Valid AnalyseDto analyseDto) {
         checkAuthenticatedUser(patientId);
+        analyseDto.setId(analyseId);
         PatientDto patientDto = patientServicesImp.updateAnalyse(patientId, analyseDto);
         return ResponseEntity.ok(patientDto);
     }
@@ -91,7 +97,7 @@ public class PatientController {
      * @return Updated patient information (currently returns empty DTO).
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/insurance-company")
+    @PutMapping("/{patientId}/insurance-company")
     public ResponseEntity<PatientDto> updateInsuranceCompany(@PathVariable Long patientId, @RequestBody @Valid InsuranceCompanyDto insuranceCompanyDto) {
         checkAuthenticatedUser(patientId);
         // Currently not implemented
@@ -106,9 +112,12 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/measurements")
-    public ResponseEntity<PatientDto> updateMeasurement(@PathVariable Long patientId, @RequestBody @Valid MeasurementDto measurementDto) {
+    @PutMapping("/{patientId}/measurements/{measurementId}")
+    public ResponseEntity<PatientDto> updateMeasurement(@PathVariable Long patientId,
+                                                        @PathVariable Long measurementId,
+                                                        @RequestBody @Valid MeasurementDto measurementDto) {
         checkAuthenticatedUser(patientId);
+        measurementDto.setId(measurementId);
         PatientDto patientDto = patientServicesImp.updateMeasurement(patientId, measurementDto);
         return ResponseEntity.ok(patientDto);
     }
@@ -121,9 +130,12 @@ public class PatientController {
      * @return Updated patient information.
      * @throws AccessDeniedException if the authenticated user is not the owner of the record.
      */
-    @PostMapping("/{patientId}/history")
-    public ResponseEntity<PatientDto> updateHistoryRecord(@PathVariable Long patientId, @RequestBody @Valid PatientHistoryRecordDto historyDto) {
+    @PutMapping("/{patientId}/history/{historyId}")
+    public ResponseEntity<PatientDto> updateHistoryRecord(@PathVariable Long patientId,
+                                                         @PathVariable Long historyId,
+                                                         @RequestBody @Valid PatientHistoryRecordDto historyDto) {
         checkAuthenticatedUser(patientId);
+        historyDto.setId(historyId);
         PatientDto patientDto = patientServicesImp.updateHistoryRecord(patientId, historyDto);
         return ResponseEntity.ok(patientDto);
     }
