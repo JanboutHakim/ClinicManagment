@@ -219,8 +219,8 @@ public class DoctorServicesImp implements DoctorServices {
     @Transactional
     public DoctorDto updateSchedule(Long doctorId, DoctorScheduleDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
-        doctor.updateSchedule(dto.getDoctorId(), schedule -> {
-            modelMapper.map(schedule, dto);
+        doctor.updateSchedule(dto.getId(), schedule -> {
+            modelMapper.map(dto, schedule);
         });
         return convertDoctorToDto(doctor);
     }
@@ -247,7 +247,7 @@ public class DoctorServicesImp implements DoctorServices {
     @Transactional
     public DoctorDto updateHolidaySchedule(Long doctorId, DoctorHolidayScheduleDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
-        doctor.updateHolidaySchedule(dto.getDoctorId(), holidaySchedule -> {
+        doctor.updateHolidaySchedule(dto.getId(), holidaySchedule -> {
             modelMapper.map(dto, holidaySchedule);
         });
         return convertDoctorToDto(doctor);

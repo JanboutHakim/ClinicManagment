@@ -226,8 +226,9 @@ public class PatientServicesImp implements PatientServices {
     }
 
     public Doctor getDoctorEntityFromAppointment(Appointment appointment) {
-        return doctorRepository.findById(appointment.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient with ID " + appointment.getId() + " not found"));
+        Long doctorId = appointment.getDoctor().getId();
+        return doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient with ID " + doctorId + " not found"));
     }
 
 
