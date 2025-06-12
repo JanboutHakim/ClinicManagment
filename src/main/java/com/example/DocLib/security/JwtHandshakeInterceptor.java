@@ -33,7 +33,11 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 // ignore invalid token; handshake proceeds without authentication
             }
         }
-        return true;
+            // reject handshake if no valid token
+            if (response instanceof org.springframework.http.server.ServletServerHttpResponse httpResponse) {
+                httpResponse.getServletResponse().setStatus(401);
+            }
+            return false;
     }
 
     @Override

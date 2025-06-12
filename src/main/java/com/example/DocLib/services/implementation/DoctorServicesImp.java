@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -200,6 +201,7 @@ public class DoctorServicesImp implements DoctorServices {
     // Schedule operations
     @Override
     @Transactional
+    @CacheEvict(value = "availableSlots", key = "#dto.doctorId + '-' + #dto.startTime")
     public DoctorDto addSchedule(Long doctorId, DoctorScheduleDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
         DoctorSchedule schedule = modelMapper.map(dto, DoctorSchedule.class);
@@ -209,6 +211,7 @@ public class DoctorServicesImp implements DoctorServices {
 
     @Override
     @Transactional
+    @CacheEvict(value = "availableSlots", key = "#doctorId + '-' + #scheduleId")
     public DoctorDto removeSchedule(Long doctorId, Long scheduleId) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.removeScheduleById(scheduleId);
@@ -217,6 +220,7 @@ public class DoctorServicesImp implements DoctorServices {
 
     @Override
     @Transactional
+    @CacheEvict(value = "availableSlots", key = "#dto.doctorId + '-' + #dto.startTime")
     public DoctorDto updateSchedule(Long doctorId, DoctorScheduleDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.updateSchedule(dto.getId(), schedule -> {
@@ -228,6 +232,7 @@ public class DoctorServicesImp implements DoctorServices {
     // Holiday Schedule operations
     @Override
     @Transactional
+    @CacheEvict(value = "availableSlots", key = "#dto.doctorId + '-' + #dto.startTime")
     public DoctorDto addHolidaySchedule(Long doctorId, DoctorHolidayScheduleDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
         DoctorHolidaySchedule holidaySchedule = modelMapper.map(dto, DoctorHolidaySchedule.class);
@@ -237,6 +242,7 @@ public class DoctorServicesImp implements DoctorServices {
 
     @Override
     @Transactional
+    @CacheEvict(value = "availableSlots", key = "#doctorId + '-' + #holidayScheduleId")
     public DoctorDto removeHolidaySchedule(Long doctorId, Long holidayScheduleId) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.removeHolidayScheduleById(holidayScheduleId);
@@ -245,6 +251,7 @@ public class DoctorServicesImp implements DoctorServices {
 
     @Override
     @Transactional
+    @CacheEvict(value = "availableSlots", key = "#dto.doctorId + '-' + #dto.startTime")
     public DoctorDto updateHolidaySchedule(Long doctorId, DoctorHolidayScheduleDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
         doctor.updateHolidaySchedule(dto.getId(), holidaySchedule -> {

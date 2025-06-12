@@ -32,6 +32,8 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     // ignore invalid token
                 }
             }
+            // Reject connection if token is missing or invalid
+            return null;
         }
         return message;
     }
