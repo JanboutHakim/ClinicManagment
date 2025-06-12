@@ -59,7 +59,7 @@ public class AppointmentServicesImp implements AppointmentServices {
 
     @Override
     @Transactional
-    @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId + '-' + #appointmentDto.startTime")
+    @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId")
     public AppointmentDto addAppointment(AppointmentDto appointmentDto) {
         appointmentDto.setStatus(AppointmentStatus.ON_HOLD);
 
@@ -98,7 +98,7 @@ public class AppointmentServicesImp implements AppointmentServices {
 
     @Override
     @Transactional
-    @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId + '-' + #appointmentDto.startTime")
+    @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId")
     public AppointmentDto rescheduleAppointment(Long appointmentId, AppointmentDto appointmentDto) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         LocalDateTime newEndTime = appointmentDto.getStartTime()
@@ -124,7 +124,7 @@ public class AppointmentServicesImp implements AppointmentServices {
 
     @Override
     @Transactional
-    @CacheEvict(value = "availableSlots", key = "#appointmentId")
+    @CacheEvict(value = "availableSlots", key = "#root.target.getAppointmentEntity(#appointmentId).getDoctor().getId()")
     public AppointmentDto cancelAppointmentByClinic(Long appointmentId, String cancellationReason) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         appointment.setCancellationReason(cancellationReason);
@@ -136,7 +136,7 @@ public class AppointmentServicesImp implements AppointmentServices {
 
     @Override
     @Transactional
-    @CacheEvict(value = "availableSlots", key = "#appointmentId")
+    @CacheEvict(value = "availableSlots", key = "#root.target.getAppointmentEntity(#appointmentId).getDoctor().getId()")
     public AppointmentDto cancelAppointmentByPatient(Long appointmentId, String cancellationReason) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         appointment.setCancellationReason(cancellationReason);
@@ -263,7 +263,10 @@ public class AppointmentServicesImp implements AppointmentServices {
     public void checkUpcomingAppointments() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime targetTime = now.plusMinutes(REMINDER_THRESHOLD_MINUTES);
-        List<Appointment> upcomingAppointments = appointmentRepository.findByStartTimeBetween(now, targetTime);
+        List<Appointment> upcomingAppointments = appointmentRepository.findByStartTimeBetween(now, targetTime)
+                .stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.CONFIRMED || a.getStatus() == AppointmentStatus.ON_HOLD)
+                .toList();
 
         for (Appointment appointment : upcomingAppointments) {
             Patient patient = appointment.getPatient();
