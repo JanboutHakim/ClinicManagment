@@ -3,6 +3,7 @@ package com.example.DocLib.controllers;
 import com.example.DocLib.dto.UserDto;
 import com.example.DocLib.models.authentication.LoginRequest;
 import com.example.DocLib.models.authentication.TokenResponse;
+import com.example.DocLib.dto.RefreshTokenRequest;
 import com.example.DocLib.services.implementation.AuthServices;
 import com.example.DocLib.services.implementation.UserServicesImp;
 import org.junit.jupiter.api.Test;
@@ -46,5 +47,21 @@ class AuthControllerTest {
 
         assertSame(token, result.getBody());
         verify(authServices).attemptLogin("u","p");
+    }
+
+    @Test
+    void refreshTokenUsesService() {
+        UserServicesImp userServices = mock(UserServicesImp.class);
+        AuthServices authServices = mock(AuthServices.class);
+        PasswordEncoder encoder = mock(PasswordEncoder.class);
+        AuthController controller = new AuthController(userServices, authServices, encoder);
+
+        TokenResponse token = new TokenResponse();
+        when(authServices.refreshToken("r")).thenReturn(token);
+
+        ResponseEntity<TokenResponse> result = controller.refreshToken(new RefreshTokenRequest("r"));
+
+        assertSame(token, result.getBody());
+        verify(authServices).refreshToken("r");
     }
 }
