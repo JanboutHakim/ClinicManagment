@@ -52,7 +52,7 @@ import java.util.List;
  */
 
 @RestController
-@RequestMapping("/doctor")
+@RequestMapping("/doctors")
 public class DoctorController {
     private final DoctorServicesImp doctorServicesImp;
     private final AppointmentServicesImp appointmentServicesImp;
@@ -78,7 +78,7 @@ public class DoctorController {
      *
      * @return A ResponseEntity containing a list of DoctorDto objects representing all doctors.
      */
-    @GetMapping("/all")
+    @GetMapping("")
     public ResponseEntity<List<DoctorDto>> getAllDoctors() {
         List<DoctorDto> doctors = doctorServicesImp.getAllDoctors();
         return ResponseEntity.ok(doctors);
@@ -103,7 +103,7 @@ public class DoctorController {
     /**
      *
      */
-    @PostMapping("/{id}/specialization")
+    @PostMapping("/{id}/specializations")
     public ResponseEntity<DoctorDto> addSpecialization(@PathVariable Long id, @RequestBody @Valid SpecializationsDto specializationDto) {
         checkAuthenticatedUser(id);
         DoctorDto updatedDoctor = doctorServicesImp.addSpecialization(id, specializationDto);
@@ -154,7 +154,7 @@ public class DoctorController {
     /**
      *
      */
-    @PostMapping("/{doctorId}/experiences/delete/{experienceId}")
+    @PostMapping("/{doctorId}/experiences/{experienceId}")
     public ResponseEntity<DoctorDto> removeExperience(@PathVariable Long doctorId, @PathVariable  Long experienceId) {
         checkAuthenticatedUser(doctorId);
         DoctorDto updatedDoctor = doctorServicesImp.removeExperience(doctorId, experienceId);
@@ -194,7 +194,7 @@ public class DoctorController {
      * @param scientificBackgroundId The ID of the scientific background to be removed
      * @return ResponseEntity containing the updated DoctorDto after removing the scientific background
      */
-    @PostMapping("/{doctorId}/scientific-backgrounds/delete/{scientificBackgroundId}")
+    @PostMapping("/{doctorId}/scientific-backgrounds/{scientificBackgroundId}")
     public ResponseEntity<DoctorDto> removeScientificBackground(@PathVariable Long doctorId, @PathVariable Long scientificBackgroundId) {
         checkAuthenticatedUser(doctorId);
         DoctorDto updatedDoctor = doctorServicesImp.removeScientificBackground(doctorId, scientificBackgroundId);
@@ -220,7 +220,7 @@ public class DoctorController {
     /**
      *
      */
-    @PostMapping("/{doctorId}/services/delete/{serviceId}")
+    @PostMapping("/{doctorId}/services/{serviceId}")
     public ResponseEntity<DoctorDto> removeService(@PathVariable Long doctorId, @PathVariable Long serviceId) {
         checkAuthenticatedUser(doctorId);
         DoctorDto updatedDoctor = doctorServicesImp.removeService(doctorId, serviceId);
@@ -271,7 +271,7 @@ public class DoctorController {
      * @param doctorHolidayScheduleId the ID of the holiday schedule to remove
      * @return ResponseEntity containing the updated DoctorDto after removing the holiday schedule
      */
-    @PostMapping("/{doctorId}/holiday-schedules/delete/{doctorHolidayScheduleId}")
+    @PostMapping("/{doctorId}/holiday-schedules/{doctorHolidayScheduleId}")
     public ResponseEntity<DoctorDto> removeHolidaySchedule(@PathVariable Long doctorId, @PathVariable Long doctorHolidayScheduleId) {
         checkAuthenticatedUser(doctorId);
         DoctorDto updatedDoctor = doctorServicesImp.removeHolidaySchedule(doctorId, doctorHolidayScheduleId);
@@ -359,7 +359,7 @@ public class DoctorController {
     /**
      *
      */
-    @PostMapping("/{doctorId}/specializations/delete/{specializationId}")
+    @PostMapping("/{doctorId}/specializations/{specializationId}")
     public ResponseEntity<DoctorDto> removeSpecialization(@PathVariable Long doctorId, @PathVariable Long specializationId) {
         checkAuthenticatedUser(doctorId);
         DoctorDto updatedDoctor = doctorServicesImp.removeSpecialization(doctorId, specializationId);
@@ -422,7 +422,7 @@ public class DoctorController {
         return ResponseEntity.ok(updatedDoctor);
     }
 
-    @PutMapping("/{doctorId}/CheckupDuration")
+    @PutMapping("/{doctorId}/checkup-duration")
     public ResponseEntity<DoctorDto> updateCheckupDuration(@PathVariable Long doctorId,@RequestBody @Valid IntegerDto integerDto){
         checkAuthenticatedUser(doctorId);
         DoctorDto doctorDto = doctorServicesImp.updateCheckupDuration(doctorId,integerDto);

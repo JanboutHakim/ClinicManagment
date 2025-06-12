@@ -13,7 +13,7 @@ import java.util.Map;
 public class NotificationController {
 
 
-    @MessageMapping("/sendMassage")
+    @MessageMapping("/send-message")
     @SendTo("/queue/appointments")
     public MessageDto getMessage(MessageDto message) throws InterruptedException {
         System.out.println("Received: " + message.getName());
