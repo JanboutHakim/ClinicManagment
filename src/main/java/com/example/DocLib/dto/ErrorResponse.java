@@ -4,13 +4,18 @@ package com.example.DocLib.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse {
 
-    private int statusCode;
+    @NotNull
+    private Integer statusCode;
+
+    @NotBlank
     private String message;
 
     public ErrorResponse(String message)

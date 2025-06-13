@@ -7,6 +7,7 @@ import com.example.DocLib.models.patient.Measurement;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class PatientDto   {
 
     private Long patientId;
 
+    @NotBlank(message = "Address is required")
     private String address;
 
     private List<AnalyseDto> analyses;
