@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -200,6 +201,7 @@ public class DoctorServicesImp implements DoctorServices {
     // Schedule operations
     @Override
     @Transactional
+    @CacheEvict(value = "availableSlots", key = "#doctorId")
     public DoctorDto addSchedule(Long doctorId, DoctorScheduleDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
         DoctorSchedule schedule = modelMapper.map(dto, DoctorSchedule.class);

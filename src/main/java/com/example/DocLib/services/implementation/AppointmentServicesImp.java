@@ -70,7 +70,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         if (!isDoctorAvailable(appointmentDto.getDoctorId(), appointmentDto.getStartTime()) ||
                 isDoctorOnVacation(appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
             throw new AppointmentNotAvailableAtThisTime("Doctor is not available at the requested time.");
-        } else if (!isPatientAvailable(appointmentDto.getPatientId(), appointmentDto.getStartTime())) {
+        } else if (!isPatientAvailable(appointmentDto.getPatientId(), appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
             throw new AppointmentNotAvailableAtThisTime("Patient is not available at the requested time.");
         }
 
@@ -108,7 +108,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         if (!isDoctorAvailable(appointmentDto.getDoctorId(), appointmentDto.getStartTime()) ||
                 isDoctorOnVacation(appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
             throw new AppointmentNotAvailableAtThisTime("Doctor is not available at the requested time.");
-        } else if (!isPatientAvailable(appointmentDto.getPatientId(), appointmentDto.getStartTime())) {
+        } else if (!isPatientAvailable(appointmentDto.getPatientId(), appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
             throw new AppointmentNotAvailableAtThisTime("Patient is not available at the requested time.");
         }
 
@@ -211,8 +211,12 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
 
     @Override
-    public boolean isPatientAvailable(Long patientId, LocalDateTime startTime) {
-        return !appointmentRepository.existsByPatientIdAndStartTime(patientId, startTime);
+    public boolean isPatientAvailable(Long patientId, Long doctorId, LocalDateTime startTime) {
+        LocalDateTime endTime = startTime.plusMinutes(getCachedCheckupDuration(doctorId));
+        return appointmentRepository.findOverlappingAppointmentsForPatient(
+                patientId, startTime, endTime,
+                List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.ON_HOLD)
+        ).isEmpty();
     }
 
     @Override
