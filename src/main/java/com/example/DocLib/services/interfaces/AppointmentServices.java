@@ -31,7 +31,7 @@ public interface AppointmentServices {
         List<AppointmentDto> getUpcomingAppointmentsForDoctor(Long doctorId);
 
         // Availability Checking
-        boolean isPatientAvailable(Long patientId, LocalDateTime startTime);
+        boolean isPatientAvailable(Long patientId, Long doctorId, LocalDateTime startTime);
         boolean isDoctorAvailable(Long doctorId, LocalDateTime dateTime);
         boolean isDoctorOnVacation(Long doctorId, LocalDateTime startTime);
         List<LocalDateTime> getDoctorAvailableSlots(Long doctorId);
