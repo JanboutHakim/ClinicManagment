@@ -18,15 +18,20 @@ class AppointmentServicesImpTest {
     @Test
     void isPatientAvailableChecksRepository() {
         AppointmentRepository repo = mock(AppointmentRepository.class);
+        DoctorServicesImp doctor = mock(DoctorServicesImp.class);
         AppointmentServicesImp service = new AppointmentServicesImp(new ModelMapper(), repo,
-                mock(SimpMessagingTemplate.class), mock(DoctorServicesImp.class),
+                mock(SimpMessagingTemplate.class), doctor,
                 mock(PatientServicesImp.class), mock(UserServicesImp.class));
 
         LocalDateTime time = LocalDateTime.now();
-        when(repo.existsByPatientIdAndStartTime(2L, time)).thenReturn(false);
+        DoctorDto dto = new DoctorDto();
+        dto.setCheckupDurationInMinutes(30);
+        when(doctor.getDoctorById(1L)).thenReturn(dto);
+        when(repo.findOverlappingAppointmentsForPatient(eq(2L), eq(time), eq(time.plusMinutes(30)), anyList()))
+                .thenReturn(Collections.emptyList());
 
-        assertTrue(service.isPatientAvailable(2L, time));
-        verify(repo).existsByPatientIdAndStartTime(2L, time);
+        assertTrue(service.isPatientAvailable(2L, 1L, time));
+        verify(repo).findOverlappingAppointmentsForPatient(eq(2L), eq(time), eq(time.plusMinutes(30)), anyList());
     }
 
     @Test

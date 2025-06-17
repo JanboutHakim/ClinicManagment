@@ -28,6 +28,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
                                                   @Param("startTime") LocalDateTime startTime,
                                                   @Param("endTime") LocalDateTime endTime,
                                                   @Param("statuses") List<AppointmentStatus> statuses);
+
+    @Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId " +
+            "AND a.status IN :statuses " +
+            "AND ((:startTime BETWEEN a.startTime AND a.endTime) OR " +
+            "(:endTime BETWEEN a.startTime AND a.endTime) OR " +
+            "(a.startTime BETWEEN :startTime AND :endTime))")
+    List<Appointment> findOverlappingAppointmentsForPatient(@Param("patientId") Long patientId,
+                                                            @Param("startTime") LocalDateTime startTime,
+                                                            @Param("endTime") LocalDateTime endTime,
+                                                            @Param("statuses") List<AppointmentStatus> statuses);
     @Query("SELECT a FROM Appointment a WHERE " +
             "((:startTime BETWEEN a.startTime AND a.endTime) OR " +
             "(:endTime BETWEEN a.startTime AND a.endTime) OR " +

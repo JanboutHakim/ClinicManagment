@@ -4,13 +4,14 @@ import com.example.DocLib.enums.AppointmentStatus;
 import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.patient.Patient;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+
+import static java.time.LocalDateTime.now;
 
 @Getter
 @Setter
@@ -40,8 +41,19 @@ public class Appointment {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = now();
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = now();
+    }
 
 
 
