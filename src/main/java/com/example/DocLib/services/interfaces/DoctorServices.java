@@ -11,9 +11,11 @@ public interface DoctorServices {
         // Core Doctor Management
         DoctorDto getDoctorById(Long id);
         List<DoctorDto> getAllDoctors();
+        List<DoctorDto> searchDoctors(String query);
 
         // Basic Field Updates
         DoctorDto updateAddress(Long id, String address);
+        DoctorDto updateClinicPhoneNumber(Long id, String clinicPhoneNumber);
         DoctorDto updateCheckupDuration(Long id,IntegerDto integerDto);
         DoctorDto updateYearsOfExperience(Long id, int years);
         DoctorDto updateUnionMembershipNumber(Long id, String number);

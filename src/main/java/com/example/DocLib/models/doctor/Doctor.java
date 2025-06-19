@@ -30,6 +30,8 @@ public class Doctor {
 
     private String clinicName;
 
+    private String clinicPhoneNumber;
+
     private String address;
 
     private int checkupDurationInMinutes;

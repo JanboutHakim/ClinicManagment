@@ -2,6 +2,8 @@ package com.example.DocLib.dto.doctor;
 
 import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.InsuranceCompanyDto;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,11 @@ public class DoctorDto {
 
     @NotBlank(message = "Clinic Name  is required")
     private String clinicName;
+
+    @NotBlank(message = "Clinic Phone Number is required")
+    @Size(min = 10, message = "Phone Number must be at least 10 characters long")
+    @Pattern(regexp = "^\\+?[0-9]{10,14}$", message = "Phone number must be between 10 and 15 characters and may start with +")
+    private String clinicPhoneNumber;
 
     @Min(value = 1, message = "Checkup duration must be positive")
     private int checkupDurationInMinutes;

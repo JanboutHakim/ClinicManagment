@@ -16,9 +16,6 @@ public class ScientificBackgroundDto {
     private Long doctorId;
     private Long id;
 
-    @NotNull(message = "Doctor cannot be null")
-    private Doctor doctor;
-
 
     @Size(min = 2, max = 100, message = "Field of Study must be between 2 and 100 characters long")
     @NotNull(message = "Field of Study cannot be null")

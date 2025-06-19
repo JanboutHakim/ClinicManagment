@@ -49,7 +49,18 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/auth/register", "/auth/login", "/auth/refresh", "/app/**", "/ws/**","/doctors/**","appointments/doctor/**","/drugs","/images/**").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/auth/register",
+                                "/auth/login",
+                                "/auth/refresh",
+                                "/app/**",
+                                "/ws/**",
+                                "/doctors/search",
+                                "appointments/doctor/**",
+                                "/drugs",
+                                "/images/**"
+                        ).permitAll()
                         .requestMatchers("/doctor/**").hasRole("DOCTOR")
                         .requestMatchers("/patient/**").hasRole("PATIENT")
                         .requestMatchers("/appointments/**").hasAnyRole("DOCTOR", "PATIENT")

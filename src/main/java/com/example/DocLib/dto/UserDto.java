@@ -40,8 +40,8 @@ public class UserDto {
     private String email;
 
     @NotBlank(message = "Phone number is required")
-    @Size(min = 10,message = "Phone Number must be at least 10 characters long")
-    @Pattern(regexp = "^[0-9]{10,15}$", message = "Phone number must be between 10 and 15 digits")
+    @Size(min = 10, message = "Phone Number must be at least 10 characters long")
+    @Pattern(regexp = "^\\+?[0-9]{10,14}$", message = "Phone number must be between 10 and 15 characters and may start with +")
     private String phoneNumber;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

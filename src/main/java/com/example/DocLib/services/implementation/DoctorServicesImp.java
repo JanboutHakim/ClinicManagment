@@ -46,10 +46,25 @@ public class DoctorServicesImp implements DoctorServices {
     }
 
     @Override
+    public List<DoctorDto> searchDoctors(String query) {
+        return doctorRepository.searchDoctor(query).stream()
+                .map(this::convertDoctorToDto)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public DoctorDto updateAddress(Long id, String address) {
         Doctor doctor = getDoctorEntity(id);
         doctor.setAddress(address);
+        return convertDoctorToDto(doctor);
+    }
+
+    @Override
+    @Transactional
+    public DoctorDto updateClinicPhoneNumber(Long id, String clinicPhoneNumber) {
+        Doctor doctor = getDoctorEntity(id);
+        doctor.setClinicPhoneNumber(clinicPhoneNumber);
         return convertDoctorToDto(doctor);
     }
 

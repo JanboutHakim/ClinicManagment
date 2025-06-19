@@ -141,6 +141,38 @@ public class AuthServices {
             case DOCTOR -> {
                 Doctor doctor = userDto.getDoctor() != null ? 
                     modelMapper.map(userDto.getDoctor(), Doctor.class) : new Doctor();
+                // Set doctor reference in all child objects
+                if (doctor.getDoctorSchedules() != null) {
+                    doctor.getDoctorSchedules().forEach(schedule -> schedule.setDoctor(doctor));
+                }
+
+                if (doctor.getHolidaySchedules() != null) {
+                    doctor.getHolidaySchedules().forEach(holiday -> holiday.setDoctor(doctor));
+                }
+
+                if (doctor.getExperiences() != null) {
+                    doctor.getExperiences().forEach(exp -> exp.setDoctor(doctor));
+                }
+
+                if (doctor.getScientificBackgrounds() != null) {
+                    doctor.getScientificBackgrounds().forEach(bg -> bg.setDoctor(doctor));
+                }
+
+                if (doctor.getServices() != null) {
+                    doctor.getServices().forEach(service -> service.setDoctor(doctor));
+                }
+
+                if (doctor.getAppointments() != null) {
+                    doctor.getAppointments().forEach(appointment -> appointment.setDoctor(doctor));
+                }
+                if(doctor.getSpecialization() !=null){
+                    doctor.getSpecialization().forEach(specializations -> specializations.setDoctor(doctor));
+                }
+
+                if (doctor.getInsuranceCompanies() != null) {
+                    // Usually many-to-many — handled via mappedBy or cascade
+                    // Ensure doctor is saved first if needed
+                }
                 doctor.setUser(user);
                 user.setDoctor(doctor);
             }

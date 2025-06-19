@@ -2,8 +2,10 @@ package com.example.DocLib.controllers;
 
 import com.example.DocLib.dto.AddressDto;
 import com.example.DocLib.dto.InsuranceCompanyDto;
+import com.example.DocLib.dto.StringDto;
 import com.example.DocLib.dto.doctor.*;
 import com.example.DocLib.exceptions.custom.AccessDeniedException;
+import com.example.DocLib.models.Drug;
 import com.example.DocLib.services.implementation.AppointmentServicesImp;
 import com.example.DocLib.services.implementation.AuthServices;
 import com.example.DocLib.services.implementation.DoctorServicesImp;
@@ -447,5 +449,20 @@ public class DoctorController {
         return ResponseEntity.ok(doctorDto);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<DoctorDto>> searchDrugs(@RequestParam String q) {
+        if(!q.isEmpty())
+          return ResponseEntity.ok(doctorServicesImp.searchDoctors(q));
+        else
+            return getAllDoctors();
+    }
+
+    @PutMapping("/{id}/clinicPhoneNumber")
+    public ResponseEntity<DoctorDto> updateClinicPhoneNumber(@RequestBody StringDto phoneNumber, @PathVariable Long id){
+        checkAuthenticatedUser(id);
+        DoctorDto doctorDto = doctorServicesImp.updateClinicPhoneNumber(id,phoneNumber.getName());
+        return ResponseEntity.ok(doctorDto);
+
+    }
 
 }
