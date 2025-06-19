@@ -77,3 +77,13 @@ opening the WebSocket connection or sending the STOMP `CONNECT` frame.
 ## Full API Documentation
 
 See [`Full_API_Documentation.pdf`](./Full_API_Documentation.pdf) for a comprehensive list of all available endpoints, request/response structures, and example JSON shapes.
+## Docker
+
+A `Dockerfile` and `docker-compose.yml` are provided to run the application with MySQL.
+Build and start both containers using:
+
+```bash
+docker-compose up --build
+```
+
+This will expose the API on [http://localhost:8080](http://localhost:8080) and persist uploads to the `uploads` directory on the host.
