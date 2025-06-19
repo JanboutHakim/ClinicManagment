@@ -32,13 +32,10 @@ public class UserDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotBlank(message = "First name is required")
-    private String firstName;
+    @NotBlank(message = "Name is required")
+    private String name;
 
-    @NotBlank(message = "Last name is required")
-    private String lastName;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
 
@@ -47,7 +44,6 @@ public class UserDto {
     @Pattern(regexp = "^[0-9]{10,15}$", message = "Phone number must be between 10 and 15 digits")
     private String phoneNumber;
 
-    @NotNull(message = "Date of birth is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate DOB;
 

@@ -20,10 +20,11 @@ public class DoctorScheduleDto {
 
         @NotNull(message = "Day of the Week cannot be null")
         private DayOfWeek dayOfWeek;
-
         @NotNull(message = "Start Time cannot be null")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
         private LocalTime startTime;
         @NotNull(message = "End Time cannot be null")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
         private LocalTime endTime;
 
 

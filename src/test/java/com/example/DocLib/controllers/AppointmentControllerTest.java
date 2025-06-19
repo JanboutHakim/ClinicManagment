@@ -1,6 +1,7 @@
 package com.example.DocLib.controllers;
 
 import com.example.DocLib.configruation.UserPrincipleConfig;
+import com.example.DocLib.dto.StringDto;
 import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.security.UserPrincipleAuthenticationToken;
 import com.example.DocLib.services.implementation.AppointmentServicesImp;
@@ -51,12 +52,12 @@ class AppointmentControllerTest {
     void cancelAppointmentByDoctorUsesService() {
         AppointmentServicesImp service = mock(AppointmentServicesImp.class);
         AppointmentController controller = new AppointmentController(service);
-        setAuth(2L, "ROLE_DOCTOR");
+        setAuth(2L, "DOCTOR");
 
         AppointmentDto dto = new AppointmentDto();
         when(service.cancelAppointmentByClinic(3L, "r")).thenReturn(dto);
 
-        ResponseEntity<AppointmentDto> result = controller.cancelAppointmentByDoctor(3L, "r", 2L);
+        ResponseEntity<AppointmentDto> result = controller.cancelAppointmentByDoctor(3L, new StringDto("r"), 2L);
 
         assertSame(dto, result.getBody());
         verify(service).cancelAppointmentByClinic(3L, "r");

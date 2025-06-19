@@ -1,5 +1,6 @@
 package com.example.DocLib.security;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.DocLib.configruation.UserPrincipleConfig;
 import org.junit.jupiter.api.Test;
@@ -20,9 +21,10 @@ class JwtHandshakeInterceptorTest {
         JwtDecoder decoder = mock(JwtDecoder.class);
         JwtPrincipleConverter converter = mock(JwtPrincipleConverter.class);
         DecodedJWT jwt = mock(DecodedJWT.class);
+        Claim claim = mock(Claim.class);
+        when(jwt.getClaim("type")).thenReturn(claim);
+        when(claim.asString()).thenReturn("access");
 
-        when(decoder.decode("token")).thenReturn(jwt);
-        when(jwt.getClaim("type").asString()).thenReturn("access");
         UserPrincipleConfig cfg = UserPrincipleConfig.builder()
                 .userId(1L)
                 .username("test")

@@ -1,5 +1,6 @@
 package com.example.DocLib.controllers;
 
+import com.example.DocLib.dto.StringDto;
 import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.appointment.LocalDateTimeBlock;
 import com.example.DocLib.dto.appointment.MonthsDto;
@@ -31,12 +32,16 @@ public class AppointmentController {
             throw new AccessDeniedException("You are not allowed to update this user.");
     }
     private void checkAuthenticatedDoctor(Long id){
-        AuthServices.getCurrentUserRole().stream().filter(rol -> rol.equals("ROLE_DOCTOR"))
+        AuthServices.getCurrentUserRole().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .filter(role -> role.equals("ROLE_DOCTOR"))
                 .findFirst()
                 .orElseThrow(() -> new AccessDeniedException("You are not allowed to update this user."));
     }
     private void checkAuthenticatedPatient(Long id){
-        AuthServices.getCurrentUserRole().stream().filter(rol -> rol.equals("ROLE_PATIENT"))
+        AuthServices.getCurrentUserRole().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .filter(role -> role.equals("ROLE_PATIENT"))
                 .findFirst()
                 .orElseThrow(() -> new AccessDeniedException("You are not allowed to update this user."));
     }
@@ -176,12 +181,12 @@ public class AppointmentController {
     /**
      *
      */
-    @PutMapping("/{appointmentId}/{id}/cancel-by-doctor")
+    @PutMapping("/{id}/{appointmentId}/cancel-by-doctor")
     public ResponseEntity<AppointmentDto> cancelAppointmentByDoctor(
             @PathVariable Long appointmentId,
-            @RequestParam String cancellationReason, @PathVariable Long id) {
-        checkAuthenticatedDoctor(id);
-        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByClinic(appointmentId, cancellationReason);
+            @RequestParam StringDto cancellationReason, @PathVariable Long id) {
+        checkAuthenticatedUser(id);
+        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByClinic(appointmentId, cancellationReason.getName());
         return ResponseEntity.ok(canceled);
     }
 
@@ -195,9 +200,9 @@ public class AppointmentController {
     @PutMapping("/{id}/{appointmentId}/cancel-by-patient")
     public ResponseEntity<AppointmentDto> cancelAppointmentByPatient(
             @PathVariable Long appointmentId,
-            @RequestParam String cancellationReason, @PathVariable Long id) {
-        checkAuthenticatedPatient(id);
-        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByPatient(appointmentId, cancellationReason);
+            @RequestBody StringDto cancellationReason, @PathVariable Long id) {
+        checkAuthenticatedUser(id);
+        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByPatient(appointmentId, cancellationReason.getName());
         return ResponseEntity.ok(canceled);
     }
 

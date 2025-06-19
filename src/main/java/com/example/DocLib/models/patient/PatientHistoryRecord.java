@@ -3,6 +3,7 @@ import com.example.DocLib.enums.HistoryRecordTypes;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 @Getter
 @Setter
@@ -24,7 +25,7 @@ public class PatientHistoryRecord {
     private String recordDetail;
 
     @Column(name = "date")
-    private Date date;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")

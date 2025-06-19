@@ -73,7 +73,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         } else if (!isPatientAvailable(appointmentDto.getPatientId(), appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
             throw new AppointmentNotAvailableAtThisTime("Patient is not available at the requested time.");
         }
-
+        appointmentDto.setStatus(AppointmentStatus.ON_HOLD);
         Appointment appointment = appointmentRepository.save(modelMapper.map(appointmentDto, Appointment.class));
         AppointmentDto dto = convertAppointmentToDto(appointment);
         sendNotification(appointmentDto.getDoctorId(), "New appointment added", dto);
@@ -204,6 +204,7 @@ public class AppointmentServicesImp implements AppointmentServices {
                 doctorId, startTime, endTime, List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.ON_HOLD)
         ).isEmpty();
     }
+
 
     @Override
     public boolean isDoctorOnVacation(Long doctorId, LocalDateTime dateTime) {
@@ -341,7 +342,6 @@ public class AppointmentServicesImp implements AppointmentServices {
                 .orElseThrow(() -> new EntityNotFoundException("Appointment with ID " + appointmentId + " not found"));
     }
 
-    @Cacheable(value = "checkupDuration", key = "#doctorId")
     public int getCachedCheckupDuration(Long doctorId) {
         return doctorServicesImp.getDoctorById(doctorId).getCheckupDurationInMinutes();
     }

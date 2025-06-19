@@ -9,6 +9,7 @@ import com.example.DocLib.services.implementation.AuthServices;
 import com.example.DocLib.services.implementation.UserServicesImp;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +39,9 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody @Valid UserDto userDto) {
         System.out.println(userDto.toString());
         UserDto createdUser = authServices.registerUser(userDto);
-        return ResponseEntity.ok(createdUser);
+        TokenResponse loginResponse = authServices.attemptLogin(userDto.getUsername(), userDto.getPassword());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
     }
 
 
@@ -48,6 +51,7 @@ public class AuthController {
      * @param request The login request containing the username and password.
      * @return ApiResponse containing the user data if login is successful, or an error message if login fails.
      */
+    @CrossOrigin
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> loginUser(@RequestBody @Validated LoginRequest request){
         return ResponseEntity.ok(authServices.attemptLogin(request.getUsername(),request.getPassword()));

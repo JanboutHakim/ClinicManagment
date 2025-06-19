@@ -32,7 +32,6 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String reason;

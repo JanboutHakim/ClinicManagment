@@ -23,6 +23,10 @@ class JwtPrincipleConverterTest {
         assertEquals(3L, principal.getUserId());
         assertEquals("alice", principal.getUsername());
         assertEquals(1, principal.getAuthorities().size());
-        assertEquals("ROLE_ADMIN", principal.getAuthorities().get(0).getAuthority());
+        assertTrue(
+                principal.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))
+        );
+
     }
 }

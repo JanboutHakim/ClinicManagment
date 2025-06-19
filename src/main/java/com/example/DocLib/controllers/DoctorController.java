@@ -325,7 +325,7 @@ public class DoctorController {
      */
     @PostMapping("/{doctorId}/schedules")
     public ResponseEntity<DoctorDto> addSchedule(@PathVariable Long doctorId, @RequestBody @Valid DoctorScheduleDto scheduleDto) {
-    //    checkAuthenticatedUser(doctorId);
+        checkAuthenticatedUser(doctorId);
         DoctorDto updatedDoctor = doctorServicesImp.addSchedule(doctorId, scheduleDto);
         return ResponseEntity.ok(updatedDoctor);
     }

@@ -28,11 +28,15 @@ public class Doctor {
     @JoinColumn(name = "id")
     private User user;
 
+    private String clinicName;
+
     private String address;
 
     private int checkupDurationInMinutes;
 
     private int yearsOfExperience;
+
+    private double checkupPrice;
 
     @Column(nullable = false)
     private String unionMembershipNumber;

@@ -1,12 +1,15 @@
 package com.example.DocLib.dto.patient;
 
 import com.example.DocLib.enums.HistoryRecordTypes;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,7 +30,8 @@ public class PatientHistoryRecordDto {
 
     @NotNull(message = "Date is required")
     @PastOrPresent(message = "Date should be in the past or present")
-    private Date date;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate date;
 
     @NotNull(message = "Patient ID is required")
     private Long patientId;

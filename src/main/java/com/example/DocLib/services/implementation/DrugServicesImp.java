@@ -33,6 +33,10 @@ public class DrugServicesImp implements DrugServices {
                 .orElseThrow(() -> new EntityNotFoundException("Drug With ID:"+drugId+"Not Found."));
     }
 
+    public List<Drug> searchDrugs(String query) {
+        return drugRepository.searchDrugs(query);
+    }
+
     @Override
     @CacheEvict(value = "availableDrug" ,allEntries = true  )
     public Drug addDrug(Drug drug){

@@ -1,5 +1,6 @@
 package com.example.DocLib.security;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.DocLib.configruation.UserPrincipleConfig;
 import jakarta.servlet.FilterChain;
@@ -25,8 +26,10 @@ class JwtAuthenticationFilterTest {
         JwtDecoder decoder = mock(JwtDecoder.class);
         JwtPrincipleConverter converter = mock(JwtPrincipleConverter.class);
         DecodedJWT jwt = mock(DecodedJWT.class);
-        when(decoder.decode("token")).thenReturn(jwt);
-        when(jwt.getClaim("type").asString()).thenReturn("access");
+        Claim claim = mock(Claim.class);
+        when(jwt.getClaim("type")).thenReturn(claim);
+        when(claim.asString()).thenReturn("access");
+
         UserPrincipleConfig cfg = UserPrincipleConfig.builder()
                 .userId(2L)
                 .username("user")

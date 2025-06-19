@@ -22,11 +22,11 @@ public class DoctorHolidayScheduleDto {
     @NotNull(message = "Holiday Date is required.")
 
     @FutureOrPresent
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startTime;
 
     @Future
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endTime;
 
     private boolean allDay;

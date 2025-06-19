@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
 
@@ -30,6 +31,11 @@ public class GlobalExceptionHandlerConfig {
         errorObject.setTimestamp(LocalDateTime.now());
         errorObject.setStatusCode(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body("File is too large! Please upload a smaller file.");
     }
 
 

@@ -5,20 +5,17 @@ import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@Getter
 @Setter
-public class MessageDto {
+@Getter
+public class StringDto {
     @NotBlank(message = "Name is required")
     @Size(max = 255, message = "Name must be at most 255 characters")
     private String name;
 
-    public MessageDto() {}
+    public StringDto() {}
 
-    public MessageDto(String name) {
+    public StringDto(String name) {
         this.name = name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 }

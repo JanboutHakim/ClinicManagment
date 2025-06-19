@@ -22,8 +22,13 @@ public class DoctorDto {
     @NotBlank(message = "Address is required")
     private String address;
 
+    @NotBlank(message = "Clinic Name  is required")
+    private String clinicName;
+
     @Min(value = 1, message = "Checkup duration must be positive")
     private int checkupDurationInMinutes;
+
+    private double checkupPrice;
 
     private List<SpecializationsDto> specialization;
 

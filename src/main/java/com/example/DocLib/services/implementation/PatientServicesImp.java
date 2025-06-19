@@ -60,7 +60,7 @@ public class PatientServicesImp implements PatientServices {
     public PatientDto addDrug(Long patientId, PatientDrugDto patientDrugDto) {
         Patient patient = getPatientEntity(patientId);
         if(patientDrugDto.isNew())
-             addNewDrug(patientId,patientDrugDto);
+             patient.addDrug(modelMapper.map(patientDrugDto,PatientDrug.class));
         else {
             patientDrugDto.setDrugName(drugServiceImp.getDrugByID(patientDrugDto.getDrugId()).getName());
             patient.addDrug(modelMapper.map(patientDrugDto, PatientDrug.class));
@@ -69,9 +69,6 @@ public class PatientServicesImp implements PatientServices {
         return convertPatientToDto(patient);
     }
 
-    private void addNewDrug(Long patientId, PatientDrugDto patientDrugDto) {
-
-    }
 
     @Override
     @Transactional

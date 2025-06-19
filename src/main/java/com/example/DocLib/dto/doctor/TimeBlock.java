@@ -1,5 +1,6 @@
 package com.example.DocLib.dto.doctor;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,9 +15,11 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class TimeBlock {
     @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime start;
 
     @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime end;
 
 }
