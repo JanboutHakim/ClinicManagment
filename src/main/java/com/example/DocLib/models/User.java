@@ -51,6 +51,10 @@ public  class User {
     @Column(name = "gender")
     private Gender gender;
 
+    @Builder.Default
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
+
     @Column(name = "created_at")
     private LocalDate createdAt;
 

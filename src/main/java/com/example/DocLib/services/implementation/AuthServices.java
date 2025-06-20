@@ -39,6 +39,7 @@ public class AuthServices {
     private final PasswordEncoder passwordEncoder;
     private final JwtDecoder jwtDecoder;
     private final JwtProperties jwtProperties;
+    private final EmailVerificationService emailVerificationService;
 
     public TokenResponse refreshToken(String refreshToken) {
         var decodedJWT = jwtDecoder.decode(refreshToken);
@@ -85,6 +86,13 @@ public class AuthServices {
             var user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+            if (Boolean.FALSE.equals(user.getEmailVerified())) {
+                return TokenResponse.builder()
+                        .message("Email not verified")
+                        .success(false)
+                        .build();
+            }
+
             return TokenResponse.builder()
                     .accessToken(token)
                     .refreshToken(refreshToken)
@@ -126,6 +134,8 @@ public class AuthServices {
         linkRoleSpecificEntity(userDto, user);
 
         User savedUser = userRepository.save(user);
+
+        emailVerificationService.createVerification(savedUser);
 
         return modelMapper.map(savedUser, UserDto.class);
     }
@@ -214,5 +224,9 @@ public class AuthServices {
                     .toList();
         }
         throw new AccessDeniedException("Invalid authentication");
+    }
+
+    public boolean verifyEmail(String username, String otp) {
+        return emailVerificationService.verifyToken(username, otp);
     }
 }

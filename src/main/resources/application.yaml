@@ -29,6 +29,18 @@ spring:
     jwt:
       secret-key: verysecretkeyohmygodwhyitissosecretdonttellanybodypleaseee
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your_gmail_username
+    password: your_gmail_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 logging:
   level:
     org:
