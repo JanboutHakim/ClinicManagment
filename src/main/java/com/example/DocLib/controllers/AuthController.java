@@ -2,6 +2,7 @@ package com.example.DocLib.controllers;
 
 import com.example.DocLib.dto.RefreshTokenRequest;
 import com.example.DocLib.dto.UserDto;
+import com.example.DocLib.dto.OtpVerificationRequest;
 import com.example.DocLib.models.authentication.ApiResponse;
 import com.example.DocLib.models.authentication.LoginRequest;
 import com.example.DocLib.models.authentication.TokenResponse;
@@ -36,12 +37,32 @@ public class AuthController {
      * @return ResponseEntity containing the created UserDto if registration is successful.
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid UserDto userDto) {
-        System.out.println(userDto.toString());
+    public ResponseEntity<ApiResponse<UserDto>> register(@RequestBody @Valid UserDto userDto) {
         UserDto createdUser = authServices.registerUser(userDto);
-        TokenResponse loginResponse = authServices.attemptLogin(userDto.getUsername(), userDto.getPassword());
+        ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
+                .data(createdUser)
+                .message("User registered. Check email for verification code")
+                .success(true)
+                .accessToken(null)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse<Void>> verifyOtp(@RequestBody @Valid OtpVerificationRequest request) {
+        boolean verified = authServices.verifyEmail(request.getUsername(), request.getOtp());
+        if (verified) {
+            return ResponseEntity.ok(ApiResponse.<Void>builder()
+                    .message("Email verified")
+                    .success(true)
+                    .build());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ApiResponse.<Void>builder()
+                        .message("Invalid or expired OTP")
+                        .success(false)
+                        .build()
+        );
     }
 
 

@@ -26,7 +26,7 @@ class AuthControllerTest {
 
         ResponseEntity<?> response = controller.register(dto);
 
-        assertEquals(dto, response.getBody());
+        assertTrue(response.getBody().toString().contains("User registered"));
         verify(authServices).registerUser(dto);
     }
 
