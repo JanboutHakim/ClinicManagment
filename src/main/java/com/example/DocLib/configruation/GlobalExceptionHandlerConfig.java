@@ -41,6 +41,7 @@ public class GlobalExceptionHandlerConfig {
                 .body("File is too large! Please upload a smaller file.");
     }
 
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();

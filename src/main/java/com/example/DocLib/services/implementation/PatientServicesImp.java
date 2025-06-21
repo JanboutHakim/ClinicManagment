@@ -10,9 +10,11 @@ import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.patient.*;
 import com.example.DocLib.repositories.AppointmentRepository;
 import com.example.DocLib.repositories.DoctorRepository;
+import com.example.DocLib.repositories.PatientDrugRepository;
 import com.example.DocLib.repositories.PatientRepository;
 import com.example.DocLib.services.interfaces.PatientServices;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,16 +31,18 @@ public class PatientServicesImp implements PatientServices {
     private final ModelMapper modelMapper;
     private final AppointmentRepository appointmentRepository;
     private final DoctorRepository doctorRepository;
+    private final PatientDrugRepository patientDrugRepository;
 
 
     @Autowired
-    public PatientServicesImp(PatientRepository patientRepository, DrugServicesImp drugServiceImp, ModelMapper modelMapper, AppointmentRepository appointmentRepository, DoctorRepository doctorRepository) {
+    public PatientServicesImp(PatientRepository patientRepository, DrugServicesImp drugServiceImp, ModelMapper modelMapper, AppointmentRepository appointmentRepository, DoctorRepository doctorRepository, PatientDrugRepository patientDrugRepository) {
         this.patientRepository = patientRepository;
         this.drugServiceImp = drugServiceImp;
         this.modelMapper = modelMapper;
 
         this.appointmentRepository = appointmentRepository;
         this.doctorRepository = doctorRepository;
+        this.patientDrugRepository = patientDrugRepository;
     }
 
     @Override
@@ -56,11 +60,21 @@ public class PatientServicesImp implements PatientServices {
     }
 
     @Override
+    public List<PatientDrugDto> getPatientDrugs(Long id) {
+        return patientDrugRepository.findByPatientId(id).stream()
+                .map(dr -> modelMapper.map(dr,PatientDrugDto.class))
+                .toList();
+    }
+
+    @Override
     @Transactional
     public PatientDto addDrug(Long patientId, PatientDrugDto patientDrugDto) {
         Patient patient = getPatientEntity(patientId);
-        if(patientDrugDto.isNew())
-             patient.addDrug(modelMapper.map(patientDrugDto,PatientDrug.class));
+        if(patientDrugDto.getDrugId()==null)
+             if(patientDrugDto.getDrugName()==null)
+                 throw new ValidationException("The Drug Name Must Not Be Empty");
+        else{
+             patient.addDrug(modelMapper.map(patientDrugDto,PatientDrug.class));}
         else {
             patientDrugDto.setDrugName(drugServiceImp.getDrugByID(patientDrugDto.getDrugId()).getName());
             patient.addDrug(modelMapper.map(patientDrugDto, PatientDrug.class));

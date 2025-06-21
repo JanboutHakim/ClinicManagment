@@ -13,48 +13,31 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Consumer;
-
+@Entity
+@Table(name = "patient_drug")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "patient_drug")
 public class PatientDrug {
-
-
-
-    @EmbeddedId
-    private PatientDrugId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // Renamed from drugId for clarity
 
     @ManyToOne
-    @MapsId("patientId")
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
-    @ManyToOne
-    @MapsId("drugId")
-    @JoinColumn(name = "drug_id")
-    private Drug drug;
-
     private String drugName;
+    private String dosage;
+    private int frequency;
 
-    private String Dosage;
-
-    private boolean isNew;
-
-    private int Frequency;
-
-    private LocalDate startDate ;
-
-    private LocalDate endDate ;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private DrugStatus drugStatus;
 
-    @OneToMany(mappedBy = "patientDrug", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "patientDrug", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DrugAlarm> drugAlarms;
-
-
-
 }

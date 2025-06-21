@@ -14,6 +14,7 @@ public interface PatientServices {
         PatientDto getPatientById(Long id);
 
         // Drug
+        List<PatientDrugDto> getPatientDrugs(Long id);
         PatientDto addDrug(Long id, PatientDrugDto patientDrugDto);
         PatientDto deleteDrug(Long id, Long patientDrugId);
         PatientDto updateDrug(Long id, PatientDrugDto patientDrugDto);

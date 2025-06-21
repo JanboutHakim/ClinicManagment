@@ -153,4 +153,21 @@ public class PatientController {
         List<DoctorDto> doctorDto = patientServicesImp.getPatientDoctors(patientId);
         return ResponseEntity.ok(doctorDto);
     }
+
+
+    @GetMapping("/{patientId}/drugs")
+    public ResponseEntity<List<PatientDrugDto>> getPatientDrugs(@PathVariable Long patientId){
+        checkAuthenticatedUser(patientId);
+        List<PatientDrugDto> patientDrugDtos = patientServicesImp.getPatientDrugs(patientId);
+       return ResponseEntity.ok(patientDrugDtos);
+    }
+
+
+    @PostMapping("/{patientId}/drugs")
+    public ResponseEntity<PatientDto> addDrug(@PathVariable Long patientId,
+                                              @RequestBody @Valid PatientDrugDto patientDrugDto){
+        checkAuthenticatedUser(patientId);
+        PatientDto patientDto = patientServicesImp.addDrug(patientId,patientDrugDto);
+        return ResponseEntity.ok(patientDto);
+    }
 }

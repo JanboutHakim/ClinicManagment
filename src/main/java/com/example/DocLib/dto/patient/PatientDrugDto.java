@@ -20,18 +20,18 @@ import java.util.List;
 public class PatientDrugDto {
     private Long id;
 
-    @NotNull
     private Long patientId;
 
     private Long drugId;
 
-    private String drugName;
-    @NotBlank
-    @Size(max = 256)
-    private String Dosage;
-    private boolean isNew;
     @NotNull
-    private int Frequency;
+    private int frequency;
+
+    private String drugName;
+
+    @Size(max = 256)
+    private String dosage;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate ;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

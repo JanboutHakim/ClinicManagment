@@ -59,7 +59,8 @@ public class WebSecurityConfig {
                                 "/doctors/search",
                                 "appointments/doctor/**",
                                 "/drugs",
-                                "/images/**"
+                                "/images/**",
+                                "/auth/verify-otp"
                         ).permitAll()
                         .requestMatchers("/doctor/**").hasRole("DOCTOR")
                         .requestMatchers("/patient/**").hasRole("PATIENT")
@@ -86,8 +87,16 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration corsConfiguration =new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000","http://192.168.137.250:8080","http://192.168.137.250:3000","http://192.168.137.1:8080","http://192.168.137.1:3000"));
-        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        /*corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://192.168.137.250:8080",
+                "http://192.168.137.250:3000",
+                "http://192.168.137.1:8080",
+                "http://192.168.137.1:3000",
+                "http:/127.0.0.1:4040"));
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));*/
+        corsConfiguration.setAllowedOriginPatterns(List.of("*"));
+        corsConfiguration.setAllowedMethods(List.of("*"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source =new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",corsConfiguration);
