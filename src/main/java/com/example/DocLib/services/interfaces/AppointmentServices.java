@@ -50,8 +50,11 @@ public interface AppointmentServices {
         // Patient History
         List<AppointmentResponseDto> getPatientHistory(Long patientId, int monthsBack);
 
-        //Searching
-        List<AppointmentResponseDto> searchDoctorAppointment(String q);
+        // Searching
+        List<AppointmentResponseDto> searchAppointments(String query,
+                                                        List<AppointmentStatus> statuses,
+                                                        LocalDateTime startTime,
+                                                        LocalDateTime endTime);
     }
 
 

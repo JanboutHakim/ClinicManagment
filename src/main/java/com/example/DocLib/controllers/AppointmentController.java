@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -315,6 +316,16 @@ public class AppointmentController {
         checkAuthenticatedUser(patientId);
         List<AppointmentResponseDto> history = appointmentServicesImp.getPatientHistory(patientId, monthsBack.getMonths());
         return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<AppointmentResponseDto>> searchAppointments(
+            @RequestParam String q,
+            @RequestParam(required = false) List<AppointmentStatus> statuses,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        List<AppointmentResponseDto> results = appointmentServicesImp.searchAppointments(q, statuses, start, end);
+        return ResponseEntity.ok(results);
     }
 
 
