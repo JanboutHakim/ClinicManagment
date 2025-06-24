@@ -344,9 +344,11 @@ public class AppointmentServicesImp implements AppointmentServices {
     public List<AppointmentResponseDto> searchAppointments(String query,
                                                            List<AppointmentStatus> statuses,
                                                            LocalDateTime startTime,
-                                                           LocalDateTime endTime) {
+                                                           LocalDateTime endTime,
+                                                           Long doctorId,
+                                                           Long patientId) {
         return getResponseAppointmentList(
-                appointmentRepository.searchAppointments(query, statuses, startTime, endTime)
+                appointmentRepository.searchAppointments(query, statuses, startTime, endTime, doctorId, patientId)
         );
     }
 

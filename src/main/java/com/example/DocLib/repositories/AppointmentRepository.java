@@ -66,14 +66,18 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
     List<Appointment> findByStatus(AppointmentStatus status);
 
     @Query("SELECT a FROM Appointment a WHERE " +
-            "(:query IS NULL OR LOWER(a.doctor.clinicName) LIKE LOWER(CONCAT('%', :query, '%')) " +
-            "OR LOWER(a.patient.name) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "(:doctorId IS NULL OR a.doctor.id = :doctorId) " +
+            "AND (:patientId IS NULL OR a.patient.id = :patientId) " +
+            "AND ((:query IS NULL OR LOWER(a.doctor.clinicName) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(a.patient.name) LIKE LOWER(CONCAT('%', :query, '%')))) " +
             "AND (:statuses IS NULL OR a.status IN :statuses) " +
             "AND (:startTime IS NULL OR a.startTime >= :startTime) " +
             "AND (:endTime IS NULL OR a.endTime <= :endTime)")
     List<Appointment> searchAppointments(@Param("query") String query,
                                          @Param("statuses") List<AppointmentStatus> statuses,
                                          @Param("startTime") LocalDateTime startTime,
-                                         @Param("endTime") LocalDateTime endTime);
+                                         @Param("endTime") LocalDateTime endTime,
+                                         @Param("doctorId") Long doctorId,
+                                         @Param("patientId") Long patientId);
 
 }

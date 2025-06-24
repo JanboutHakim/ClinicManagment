@@ -318,13 +318,25 @@ public class AppointmentController {
         return ResponseEntity.ok(history);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/{id}/search")
     public ResponseEntity<List<AppointmentResponseDto>> searchAppointments(
+            @PathVariable Long id,
             @RequestParam String q,
             @RequestParam(required = false) List<AppointmentStatus> statuses,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-        List<AppointmentResponseDto> results = appointmentServicesImp.searchAppointments(q, statuses, start, end);
+        checkAuthenticatedUser(id);
+        Long doctorId = null;
+        Long patientId = null;
+        boolean isDoctor = AuthServices.getCurrentUserRole().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_DOCTOR"));
+        if (isDoctor) {
+            doctorId = id;
+        } else {
+            patientId = id;
+        }
+        List<AppointmentResponseDto> results = appointmentServicesImp.searchAppointments(q, statuses, start, end, doctorId, patientId);
         return ResponseEntity.ok(results);
     }
 
