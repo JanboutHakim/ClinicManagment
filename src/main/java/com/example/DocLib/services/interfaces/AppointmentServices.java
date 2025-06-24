@@ -54,7 +54,9 @@ public interface AppointmentServices {
         List<AppointmentResponseDto> searchAppointments(String query,
                                                         List<AppointmentStatus> statuses,
                                                         LocalDateTime startTime,
-                                                        LocalDateTime endTime);
+                                                        LocalDateTime endTime,
+                                                        Long doctorId,
+                                                        Long patientId);
     }
 
 
