@@ -32,6 +32,10 @@ public class Patient  {
 
     private User user;
 
+   /*
+   private String bloodType;
+
+    private double weight;*/
 
     @Column(name = "address")
     private String address;

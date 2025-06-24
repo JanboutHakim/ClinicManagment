@@ -3,6 +3,7 @@ package com.example.DocLib.services.implementation;
 import com.example.DocLib.dto.*;
 import com.example.DocLib.dto.doctor.DoctorDto;
 import com.example.DocLib.dto.patient.*;
+import com.example.DocLib.enums.DrugStatus;
 import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.*;
 import com.example.DocLib.models.appointment.Appointment;
@@ -70,6 +71,7 @@ public class PatientServicesImp implements PatientServices {
     @Transactional
     public PatientDto addDrug(Long patientId, PatientDrugDto patientDrugDto) {
         Patient patient = getPatientEntity(patientId);
+        patientDrugDto.setDrugStatus(DrugStatus.IN_USE);
         if(patientDrugDto.getDrugId()==null)
              if(patientDrugDto.getDrugName()==null)
                  throw new ValidationException("The Drug Name Must Not Be Empty");

@@ -4,6 +4,8 @@ package com.example.DocLib.dto.patient;
 import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.InsuranceCompanyDto;
 import com.example.DocLib.models.patient.Measurement;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +23,14 @@ public class PatientDto   {
 
     @NotBlank(message = "Address is required")
     private String address;
+
+    @Pattern(regexp = "\\[A,B,AB,O][+,-]",message = "The Blood Shape is Wrong")
+    private String bloodType;
+
+    @Size(min = 1,max = 180)
+    private double weight;
+
+
 
     private List<AnalyseDto> analyses;
 

@@ -2,6 +2,7 @@ package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.appointment.AppointmentNotificationDto;
+import com.example.DocLib.dto.appointment.AppointmentResponseDto;
 import com.example.DocLib.dto.doctor.TimeBlock;
 import com.example.DocLib.enums.AppointmentStatus;
 import com.example.DocLib.exceptions.custom.AppointmentNotAvailableAtThisTime;
@@ -124,36 +125,48 @@ public class AppointmentServicesImp implements AppointmentServices {
 
     @Override
     @Transactional
-    @CacheEvict(value = "availableSlots", key = "#root.target.getAppointmentEntity(#appointmentId).getDoctor().getId()")
-    public AppointmentDto cancelAppointmentByClinic(Long appointmentId, String cancellationReason) {
+    @CacheEvict(value = "availableSlots", key = "#appointmentId")
+    public AppointmentResponseDto cancelAppointmentByClinic(Long appointmentId, String cancellationReason) {
         Appointment appointment = getAppointmentEntity(appointmentId);
-        appointment.setCancellationReason(cancellationReason);
-        appointment.setStatus(AppointmentStatus.CANCELLED_BY_CLINIC);
-        AppointmentDto dto = convertAppointmentToDto(appointment);
-        sendNotification(appointment.getPatient().getId(), "Appointment cancelled by clinic", dto);
-        return dto;
+        if(!isCanceled(appointment)){
+            appointment.setCancellationReason(cancellationReason);
+            appointment.setStatus(AppointmentStatus.CANCELLED_BY_CLINIC);
+            AppointmentResponseDto dto = getDoctorAndPatientName(appointment);
+            sendNotification(appointment.getPatient().getId(), "Appointment cancelled by clinic", modelMapper.map(appointment,AppointmentDto.class));
+            return dto;}
+        return new AppointmentResponseDto();
+    }
+
+    private static boolean isCanceled(Appointment appointment) {
+        return appointment.getStatus().equals(AppointmentStatus.CANCELLED_BY_CLINIC) || appointment.getStatus().equals(AppointmentStatus.CANCELLED_BY_PATIENT);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "availableSlots", key = "#root.target.getAppointmentEntity(#appointmentId).getDoctor().getId()")
+    @CacheEvict(value = "availableSlots", key = "#appointmentId")
     public AppointmentDto cancelAppointmentByPatient(Long appointmentId, String cancellationReason) {
         Appointment appointment = getAppointmentEntity(appointmentId);
-        appointment.setCancellationReason(cancellationReason);
-        appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
-        AppointmentDto dto = convertAppointmentToDto(appointment);
-        sendNotification(appointment.getDoctor().getId(), "Appointment cancelled by patient", dto);
-        return dto;
+        if(!isCanceled(appointment)){
+            appointment.setCancellationReason(cancellationReason);
+            appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
+            AppointmentDto dto = convertAppointmentToDto(appointment);
+            sendNotification(appointment.getDoctor().getId(), "Appointment cancelled by patient", dto);
+            return dto;
+        }
+        return new AppointmentDto();
     }
 
     @Override
     @Transactional
     public AppointmentDto confirmAppointment(Long appointmentId) {
         Appointment appointment = getAppointmentEntity(appointmentId);
-        appointment.setStatus(AppointmentStatus.CONFIRMED);
-        AppointmentDto dto = convertAppointmentToDto(appointment);
-        sendNotification(appointment.getPatient().getId(), "Appointment confirmed", dto);
-        return dto;
+        if(!isCanceled(appointment)) {
+            appointment.setStatus(AppointmentStatus.CONFIRMED);
+            AppointmentDto dto = convertAppointmentToDto(appointment);
+            sendNotification(appointment.getPatient().getId(), "Appointment confirmed", dto);
+            return dto;
+        }
+        return new AppointmentDto();
     }
 
     @Override
@@ -169,32 +182,32 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
 
     @Override
-    public List<AppointmentDto> getAppointmentsByDoctor(Long doctorId) {
-        return convertAppointmentListToDtoList(
+    public List<AppointmentResponseDto> getAppointmentsByDoctor(Long doctorId) {
+        return getResponseAppointmentList(
                 appointmentRepository.findByDoctor(modelMapper.map(doctorServicesImp.getDoctorById(doctorId), Doctor.class))
         );
     }
 
     @Override
-    public List<AppointmentDto> getAppointmentsByPatient(Long patientId) {
-        return convertAppointmentListToDtoList(
+    public List<AppointmentResponseDto> getAppointmentsByPatient(Long patientId) {
+        return getResponseAppointmentList(
                 appointmentRepository.findByPatient(modelMapper.map(patientServicesImp.getPatientById(patientId), Patient.class))
         );
     }
 
     @Override
-    public List<AppointmentDto> getAppointmentsByDateRange(LocalDateTime start, LocalDateTime end) {
-        return convertAppointmentListToDtoList(appointmentRepository.findAppointmentBetweenTwoDates(start, end));
+    public List<AppointmentResponseDto> getAppointmentsByDateRange(LocalDateTime start, LocalDateTime end) {
+        return getResponseAppointmentList(appointmentRepository.findAppointmentBetweenTwoDates(start, end));
     }
 
     @Override
-    public List<AppointmentDto> getUpcomingAppointmentsForDoctor(Long doctorId) {
-        return convertAppointmentListToDtoList(appointmentRepository.findUpcomingAppointmentByDoctor(doctorId, LocalDateTime.now()));
+    public List<AppointmentResponseDto> getUpcomingAppointmentsForDoctor(Long doctorId) {
+        return getResponseAppointmentList(appointmentRepository.findUpcomingAppointmentByDoctor(doctorId, LocalDateTime.now()));
     }
 
     @Override
-    public List<AppointmentDto> getUpcomingAppointmentsForPatient(Long patientId) {
-        return convertAppointmentListToDtoList(appointmentRepository.findUpcomingAppointmentByPatient(patientId, LocalDateTime.now()));
+    public List<AppointmentResponseDto> getUpcomingAppointmentsForPatient(Long patientId) {
+        return getResponseAppointmentList(appointmentRepository.findUpcomingAppointmentByPatient(patientId, LocalDateTime.now()));
     }
 
     @Override
@@ -260,8 +273,8 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
 
     @Override
-    public List<AppointmentDto> getAppointmentsByStatus(AppointmentStatus status) {
-        return convertAppointmentListToDtoList(appointmentRepository.findByStatus(status));
+    public List<AppointmentResponseDto> getAppointmentsByStatus(AppointmentStatus status) {
+        return getResponseAppointmentList(appointmentRepository.findByStatus(status));
     }
 
     @Scheduled(fixedRate = 60000)
@@ -327,6 +340,11 @@ public class AppointmentServicesImp implements AppointmentServices {
         );
     }
 
+    @Override
+    public List<AppointmentResponseDto> searchDoctorAppointment(String q) {
+        return List.of();
+    }
+
     private AppointmentDto convertAppointmentToDto(Appointment appointment) {
         return modelMapper.map(appointment, AppointmentDto.class);
     }
@@ -342,7 +360,20 @@ public class AppointmentServicesImp implements AppointmentServices {
                 .orElseThrow(() -> new EntityNotFoundException("Appointment with ID " + appointmentId + " not found"));
     }
 
+    private List<AppointmentResponseDto> getResponseAppointmentList(List<Appointment> appointments){
+        return   appointments.stream()
+                .map(this::getDoctorAndPatientName)
+                .toList();
+    }
+    private AppointmentResponseDto getDoctorAndPatientName(Appointment appointment){
+        AppointmentResponseDto appointmentResponseDto = modelMapper.map(appointment,AppointmentResponseDto.class);
+        appointmentResponseDto.setPatientName(userServicesImp.findById(appointment.getPatient().getId()).get().getName());
+        appointmentResponseDto.setDoctorName(doctorServicesImp.getDoctorEntity(appointment.getDoctor().getId()).getClinicName());
+        return appointmentResponseDto;
+    }
+
     public int getCachedCheckupDuration(Long doctorId) {
         return doctorServicesImp.getDoctorById(doctorId).getCheckupDurationInMinutes();
     }
+
 }

@@ -4,6 +4,7 @@ import com.example.DocLib.models.User;
 import com.example.DocLib.models.authentication.EmailVerificationToken;
 import com.example.DocLib.repositories.EmailVerificationTokenRepository;
 import com.example.DocLib.repositories.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ public class EmailVerificationService {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
-    public void createVerification(User user) {
+    public void createVerification(User user) throws MessagingException {
         String otp = String.valueOf((int)(Math.random()*900000)+100000);
         EmailVerificationToken token = EmailVerificationToken.builder()
                 .token(otp)
@@ -25,7 +26,7 @@ public class EmailVerificationService {
                 .user(user)
                 .build();
         tokenRepository.save(token);
-        emailService.sendOtp(user.getEmail(), otp);
+        emailService.sendOtp(user.getEmail(), user.getName(), otp);
     }
 
     public boolean verifyToken(String username, String otp) {

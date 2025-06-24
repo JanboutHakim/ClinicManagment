@@ -8,6 +8,7 @@ import com.example.DocLib.models.authentication.LoginRequest;
 import com.example.DocLib.models.authentication.TokenResponse;
 import com.example.DocLib.services.implementation.AuthServices;
 import com.example.DocLib.services.implementation.UserServicesImp;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,8 +38,9 @@ public class AuthController {
      * @return ResponseEntity containing the created UserDto if registration is successful.
      */
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserDto>> register(@RequestBody @Valid UserDto userDto) {
+    public ResponseEntity<ApiResponse<UserDto> > register(@RequestBody @Valid UserDto userDto) throws MessagingException {
         UserDto createdUser = authServices.registerUser(userDto);
+
         ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
                 .data(createdUser)
                 .message("User registered. Check email for verification code")
@@ -49,16 +51,21 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<ApiResponse<Void>> verifyOtp(@RequestBody @Valid OtpVerificationRequest request) {
+    public ResponseEntity<TokenResponse> verifyOtp(@RequestBody @Valid OtpVerificationRequest request) {
         boolean verified = authServices.verifyEmail(request.getUsername(), request.getOtp());
+        var token = authServices.generateTokensForVerify(request.getUsername());
         if (verified) {
-            return ResponseEntity.ok(ApiResponse.<Void>builder()
+            return ResponseEntity.ok(TokenResponse.<Void>builder()
                     .message("Email verified")
                     .success(true)
+                    .accessToken(token.getAccessToken())
+                    .refreshToken(token.getRefreshToken())
+                    .expiresIn(token.getExpiresIn())
+                    .user(token.getUser())
                     .build());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResponse.<Void>builder()
+                TokenResponse.<Void>builder()
                         .message("Invalid or expired OTP")
                         .success(false)
                         .build()
@@ -81,6 +88,12 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
         return ResponseEntity.ok(authServices.refreshToken(request.getRefreshToken()));
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id){
+        userServicesImp.deleteUser(id);
+        return ResponseEntity.ok("");
     }
 
 

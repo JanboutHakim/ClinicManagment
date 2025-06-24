@@ -2,6 +2,7 @@ package com.example.DocLib.controllers;
 
 import com.example.DocLib.dto.StringDto;
 import com.example.DocLib.dto.appointment.AppointmentDto;
+import com.example.DocLib.dto.appointment.AppointmentResponseDto;
 import com.example.DocLib.dto.appointment.LocalDateTimeBlock;
 import com.example.DocLib.dto.appointment.MonthsDto;
 import com.example.DocLib.enums.AppointmentStatus;
@@ -104,26 +105,26 @@ public class AppointmentController {
     /**
      * Retrieves a list of appointments associated with a specific doctor.
      *
-     * @param doctorId The unique identifier of the doctor for whom appointments are to be fetched.
+     * @param id The unique identifier of the doctor for whom appointments are to be fetched.
      * @return ResponseEntity<List < AppointmentDto>> A response entity containing a list of AppointmentDto objects
      */
-    @GetMapping("/{id}/doctor/{doctorId}/appointments")
-    public ResponseEntity<List<AppointmentDto>> getAppointmentsByDoctor(@PathVariable Long doctorId, @PathVariable Long id) {
+    @GetMapping("/doctor/{id}")
+    public ResponseEntity<List<AppointmentResponseDto>> getAppointmentsByDoctor( @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByDoctor(doctorId);
+        List<AppointmentResponseDto> appointments = appointmentServicesImp.getAppointmentsByDoctor(id);
         return ResponseEntity.ok(appointments);
     }
 
     /**
      * Retrieves a list of appointments associated with a specific patient.
      *
-     * @param patientId The ID of the patient for whom to retrieve appointments
+     * @param id The ID of the patient for whom to retrieve appointments
      * @return A list of AppointmentDto objects representing appointments for the specified patient
      */
-    @GetMapping("/{id}/patient/{patientId}/appointments")
-    public ResponseEntity<List<AppointmentDto>> getAppointmentsByPatient(@PathVariable Long patientId, @PathVariable Long id) {
+    @GetMapping("/patient/{id}")
+    public ResponseEntity<List<AppointmentResponseDto>> getAppointmentsByPatient( @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByPatient(patientId);
+        List<AppointmentResponseDto> appointments = appointmentServicesImp.getAppointmentsByPatient(id);
         return ResponseEntity.ok(appointments);
     }
 
@@ -134,9 +135,9 @@ public class AppointmentController {
      * @return ResponseEntity with a list of AppointmentDto objects representing upcoming appointments for the specified doctor.
      */
     @GetMapping("/{id}/doctor/{doctorId}/upcoming-appointments")
-    public ResponseEntity<List<AppointmentDto>> getUpcomingAppointmentsForDoctor(@PathVariable Long doctorId, @PathVariable Long id) {
+    public ResponseEntity<List<AppointmentResponseDto>> getUpcomingAppointmentsForDoctor(@PathVariable Long doctorId, @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        List<AppointmentDto> appointments = appointmentServicesImp.getUpcomingAppointmentsForDoctor(doctorId);
+        List<AppointmentResponseDto> appointments = appointmentServicesImp.getUpcomingAppointmentsForDoctor(doctorId);
         return ResponseEntity.ok(appointments);
     }
 
@@ -147,9 +148,9 @@ public class AppointmentController {
      * @return ResponseEntity containing a List of AppointmentDto objects representing the upcoming appointments for the patient.
      */
     @GetMapping("/{id}/patient/{patientId}/upcoming-appointments")
-    public ResponseEntity<List<AppointmentDto>> getUpcomingAppointmentsForPatient(@PathVariable Long patientId, @PathVariable Long id) {
+    public ResponseEntity<List<AppointmentResponseDto>> getUpcomingAppointmentsForPatient(@PathVariable Long patientId, @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        List<AppointmentDto> appointments = appointmentServicesImp.getUpcomingAppointmentsForPatient(patientId);
+        List<AppointmentResponseDto> appointments = appointmentServicesImp.getUpcomingAppointmentsForPatient(patientId);
         return ResponseEntity.ok(appointments);
     }
 
@@ -171,8 +172,8 @@ public class AppointmentController {
      * @param appointmentId The ID of the appointment to confirm.
      * @return ResponseEntity containing the confirmed AppointmentDto.
      */
-    @PutMapping("/{id}/confirm")
-    public ResponseEntity<AppointmentDto> confirmAppointment(@RequestParam Long appointmentId, @PathVariable Long id) {
+    @PutMapping("/{id}/confirm/{appointmentId}")
+    public ResponseEntity<AppointmentDto> confirmAppointment(@PathVariable Long appointmentId, @PathVariable Long id) {
         checkAuthenticatedDoctor(id);
         AppointmentDto confirmedAppointment = appointmentServicesImp.confirmAppointment(appointmentId);
         return ResponseEntity.ok(confirmedAppointment);
@@ -182,11 +183,11 @@ public class AppointmentController {
      *
      */
     @PutMapping("/{id}/{appointmentId}/cancel-by-doctor")
-    public ResponseEntity<AppointmentDto> cancelAppointmentByDoctor(
+    public ResponseEntity<AppointmentResponseDto> cancelAppointmentByDoctor(
             @PathVariable Long appointmentId,
-            @RequestParam StringDto cancellationReason, @PathVariable Long id) {
+            @RequestBody StringDto cancellationReason, @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByClinic(appointmentId, cancellationReason.getName());
+        AppointmentResponseDto canceled = appointmentServicesImp.cancelAppointmentByClinic(appointmentId, cancellationReason.getName());
         return ResponseEntity.ok(canceled);
     }
 
@@ -213,7 +214,7 @@ public class AppointmentController {
      * @param status the new status to set for the appointment
      * @return ResponseEntity containing the updated AppointmentDto object with the new status
      */
-   // @PutMapping("/{appointmentId}/status")
+    @PutMapping("/{appointmentId}/status")
     public ResponseEntity<AppointmentDto> updateAppointmentStatus(
             @PathVariable Long appointmentId,
             @RequestParam AppointmentStatus status) {
@@ -228,9 +229,9 @@ public class AppointmentController {
      * @return ResponseEntity containing a list of AppointmentDto objects filtered by the specified status.
      */
     @GetMapping("/{id}/status/{status}")
-    public ResponseEntity<List<AppointmentDto>> getAppointmentsByStatus(@PathVariable AppointmentStatus status, @PathVariable Long id) {
+    public ResponseEntity<List<AppointmentResponseDto>> getAppointmentsByStatus(@PathVariable AppointmentStatus status, @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByStatus(status);
+        List<AppointmentResponseDto> appointments = appointmentServicesImp.getAppointmentsByStatus(status);
         return ResponseEntity.ok(appointments);
     }
 
@@ -241,9 +242,9 @@ public class AppointmentController {
      * @return ResponseEntity with a list of AppointmentDto objects representing appointments within the date range.
      */
     @GetMapping("/{id}/date-range")
-    public ResponseEntity<List<AppointmentDto>> getAppointmentsByDateRange(@RequestBody @Valid LocalDateTimeBlock timeBlock, @PathVariable Long id) {
+    public ResponseEntity<List<AppointmentResponseDto>> getAppointmentsByDateRange(@RequestBody @Valid LocalDateTimeBlock timeBlock, @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        List<AppointmentDto> appointments = appointmentServicesImp.getAppointmentsByDateRange(timeBlock.getStart(), timeBlock.getEnd());
+        List<AppointmentResponseDto> appointments = appointmentServicesImp.getAppointmentsByDateRange(timeBlock.getStart(), timeBlock.getEnd());
         return ResponseEntity.ok(appointments);
     }
 

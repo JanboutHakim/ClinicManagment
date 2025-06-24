@@ -2,6 +2,7 @@ package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.UserDto;
 import com.example.DocLib.exceptions.custom.AccessDeniedException;
+import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.User;
 import com.example.DocLib.models.authentication.TokenResponse;
 import com.example.DocLib.models.doctor.Doctor;
@@ -12,6 +13,7 @@ import com.example.DocLib.security.JwtIssuer;
 import com.example.DocLib.configruation.UserPrincipleConfig;
 import com.example.DocLib.security.JwtProperties;
 import io.jsonwebtoken.JwtException;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -80,9 +82,6 @@ public class AuthServices {
 
             System.out.println("Login successful for user: " + username + " with roles: " + roles);
 
-            var token = jwtIssuer.issueAccessToken(principal.getUserId(), principal.getUsername(), roles);
-            var refreshToken = jwtIssuer.issueRefreshToken(principal.getUserId(), principal.getUsername());
-
             var user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -93,14 +92,7 @@ public class AuthServices {
                         .build();
             }
 
-            return TokenResponse.builder()
-                    .accessToken(token)
-                    .refreshToken(refreshToken)
-                    .message("Login successful")
-                    .success(true)
-                    .expiresIn(jwtProperties.getAccessTokenExpirationMs())
-                    .user(modelMapper.map(user, UserDto.class))
-                    .build();
+            return generateTokens(user, roles);
 
         } catch (BadCredentialsException e) {
             return TokenResponse.builder()
@@ -124,7 +116,7 @@ public class AuthServices {
     }
 
     @Transactional
-    public UserDto registerUser(UserDto userDto) {
+    public UserDto registerUser(UserDto userDto) throws MessagingException {
         validateUserDto(userDto);
 
         User user = modelMapper.map(userDto, User.class);
@@ -138,6 +130,35 @@ public class AuthServices {
         emailVerificationService.createVerification(savedUser);
 
         return modelMapper.map(savedUser, UserDto.class);
+    }
+
+    public TokenResponse generateTokensForVerify(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(()->new ResourceNotFoundException("User Not found"));
+        var token = jwtIssuer.issueAccessToken(user.getId(), user.getUsername(), List.of(user.getRole().toString()));
+        var refreshToken = jwtIssuer.issueRefreshToken(user.getId(), user.getUsername());
+
+        return TokenResponse.builder()
+                .accessToken(token)
+                .refreshToken(refreshToken)
+                .message("Login successful")
+                .success(true)
+                .expiresIn(jwtProperties.getAccessTokenExpirationMs())
+                .user(modelMapper.map(user, UserDto.class))
+                .build();
+    }
+
+    private TokenResponse generateTokens(User user, List<String> roles) {
+        var token = jwtIssuer.issueAccessToken(user.getId(), user.getUsername(), roles);
+        var refreshToken = jwtIssuer.issueRefreshToken(user.getId(), user.getUsername());
+
+        return TokenResponse.builder()
+                .accessToken(token)
+                .refreshToken(refreshToken)
+                .message("Login successful")
+                .success(true)
+                .expiresIn(jwtProperties.getAccessTokenExpirationMs())
+                .user(modelMapper.map(user, UserDto.class))
+                .build();
     }
 
     private void validateUserDto(UserDto userDto) {
