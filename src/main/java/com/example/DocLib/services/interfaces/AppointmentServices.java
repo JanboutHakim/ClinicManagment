@@ -11,18 +11,18 @@ import com.example.DocLib.enums.AppointmentStatus;
 
 public interface AppointmentServices {
         // Core CRUD Operations
-        AppointmentDto addAppointment(AppointmentDto appointmentDto);
-        AppointmentDto getAppointmentById(Long appointmentId);
+        AppointmentResponseDto addAppointment(AppointmentDto appointmentDto);
+        AppointmentResponseDto getAppointmentById(Long appointmentId);
         void deleteAppointment(Long appointmentId);
 
         // Booking Management
         AppointmentResponseDto cancelAppointmentByClinic(Long appointmentId, String cancellationReason);
-        AppointmentDto cancelAppointmentByPatient(Long appointmentId, String cancellationReason);
-        AppointmentDto rescheduleAppointment(Long appointmentId, AppointmentDto appointmentDto);
-        AppointmentDto confirmAppointment(Long appointmentId);
+        AppointmentResponseDto cancelAppointmentByPatient(Long appointmentId, String cancellationReason);
+        AppointmentResponseDto rescheduleAppointment(Long appointmentId, AppointmentDto appointmentDto);
+        AppointmentResponseDto confirmAppointment(Long appointmentId);
 
         // Status Management
-        AppointmentDto updateAppointmentStatus(Long appointmentId, AppointmentStatus status);
+        AppointmentResponseDto updateAppointmentStatus(Long appointmentId, AppointmentStatus status);
 
         // Query Operations
         List<AppointmentResponseDto> getAppointmentsByDoctor(Long doctorId);
@@ -43,12 +43,12 @@ public interface AppointmentServices {
         void sendAppointmentReminders();
 
         // Reporting
-        List<AppointmentDto> getCancelledAppointments(Long doctorId);
+        List<AppointmentResponseDto> getCancelledAppointments(Long doctorId);
         int getAppointmentCountByStatus(AppointmentStatus status);
         double getDoctorCancellationRate(Long doctorId);
 
         // Patient History
-        List<AppointmentDto> getPatientHistory(Long patientId, int monthsBack);
+        List<AppointmentResponseDto> getPatientHistory(Long patientId, int monthsBack);
 
         //Searching
         List<AppointmentResponseDto> searchDoctorAppointment(String q);

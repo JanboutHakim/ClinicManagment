@@ -61,7 +61,7 @@ public class AppointmentServicesImp implements AppointmentServices {
     @Override
     @Transactional
     @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId")
-    public AppointmentDto addAppointment(AppointmentDto appointmentDto) {
+    public AppointmentResponseDto addAppointment(AppointmentDto appointmentDto) {
         appointmentDto.setStatus(AppointmentStatus.ON_HOLD);
 
         LocalDateTime calculatedEndTime = appointmentDto.getStartTime()
@@ -79,12 +79,12 @@ public class AppointmentServicesImp implements AppointmentServices {
         AppointmentDto dto = convertAppointmentToDto(appointment);
         sendNotification(appointmentDto.getDoctorId(), "New appointment added", dto);
         sendNotification(appointmentDto.getPatientId(), "Appointment booked", dto);
-        return dto;
+        return getDoctorAndPatientName(appointment);
     }
 
     @Override
-    public AppointmentDto getAppointmentById(Long appointmentId) {
-        return convertAppointmentToDto(getAppointmentEntity(appointmentId));
+    public AppointmentResponseDto getAppointmentById(Long appointmentId) {
+        return getDoctorAndPatientName(getAppointmentEntity(appointmentId));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class AppointmentServicesImp implements AppointmentServices {
     @Override
     @Transactional
     @CacheEvict(value = "availableSlots", key = "#appointmentDto.doctorId")
-    public AppointmentDto rescheduleAppointment(Long appointmentId, AppointmentDto appointmentDto) {
+    public AppointmentResponseDto rescheduleAppointment(Long appointmentId, AppointmentDto appointmentDto) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         LocalDateTime newEndTime = appointmentDto.getStartTime()
                 .plusMinutes(getCachedCheckupDuration(appointmentDto.getDoctorId()));
@@ -120,7 +120,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         AppointmentDto dto = convertAppointmentToDto(appointment);
         sendNotification(appointment.getDoctor().getId(), "Appointment rescheduled", dto);
         sendNotification(appointment.getPatient().getId(), "Appointment rescheduled", dto);
-        return dto;
+        return getDoctorAndPatientName(appointment);
     }
 
     @Override
@@ -144,33 +144,33 @@ public class AppointmentServicesImp implements AppointmentServices {
     @Override
     @Transactional
     @CacheEvict(value = "availableSlots", key = "#appointmentId")
-    public AppointmentDto cancelAppointmentByPatient(Long appointmentId, String cancellationReason) {
+    public AppointmentResponseDto cancelAppointmentByPatient(Long appointmentId, String cancellationReason) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         if(!isCanceled(appointment)){
             appointment.setCancellationReason(cancellationReason);
             appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
             AppointmentDto dto = convertAppointmentToDto(appointment);
             sendNotification(appointment.getDoctor().getId(), "Appointment cancelled by patient", dto);
-            return dto;
+            return getDoctorAndPatientName(appointment);
         }
-        return new AppointmentDto();
+        return new AppointmentResponseDto();
     }
 
     @Override
     @Transactional
-    public AppointmentDto confirmAppointment(Long appointmentId) {
+    public AppointmentResponseDto confirmAppointment(Long appointmentId) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         if(!isCanceled(appointment)) {
             appointment.setStatus(AppointmentStatus.CONFIRMED);
             AppointmentDto dto = convertAppointmentToDto(appointment);
             sendNotification(appointment.getPatient().getId(), "Appointment confirmed", dto);
-            return dto;
+            return getDoctorAndPatientName(appointment);
         }
-        return new AppointmentDto();
+        return new AppointmentResponseDto();
     }
 
     @Override
-    public AppointmentDto updateAppointmentStatus(Long appointmentId, AppointmentStatus status) {
+    public AppointmentResponseDto updateAppointmentStatus(Long appointmentId, AppointmentStatus status) {
         Appointment appointment = getAppointmentEntity(appointmentId);
         appointment.setStatus(status);
         appointment.setUpdatedAt(LocalDateTime.now());
@@ -178,7 +178,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         AppointmentDto dto = convertAppointmentToDto(appointment);
         sendNotification(appointment.getDoctor().getId(), "Appointment status updated", dto);
         sendNotification(appointment.getPatient().getId(), "Appointment status updated", dto);
-        return dto;
+        return getDoctorAndPatientName(appointment);
     }
 
     @Override
@@ -306,8 +306,8 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
 
     @Override
-    public List<AppointmentDto> getCancelledAppointments(Long doctorId) {
-        return convertAppointmentListToDtoList(
+    public List<AppointmentResponseDto> getCancelledAppointments(Long doctorId) {
+        return getResponseAppointmentList(
                 appointmentRepository.findByDoctorIdAndStatusIn(
                         doctorId,
                         List.of(AppointmentStatus.CANCELLED_BY_CLINIC, AppointmentStatus.CANCELLED_BY_PATIENT)
@@ -333,9 +333,9 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
 
     @Override
-    public List<AppointmentDto> getPatientHistory(Long patientId, int monthsBack) {
+    public List<AppointmentResponseDto> getPatientHistory(Long patientId, int monthsBack) {
         LocalDateTime fromDate = LocalDateTime.now().minusMonths(monthsBack);
-        return convertAppointmentListToDtoList(
+        return getResponseAppointmentList(
                 appointmentRepository.findByPatientIdAndStartTimeBetween(patientId, fromDate, LocalDateTime.now())
         );
     }

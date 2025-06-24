@@ -56,9 +56,9 @@ public class AppointmentController {
      * @return ResponseEntity containing the AppointmentDto representing the appointment.
      */
     @GetMapping("/{id}/{appointmentId}")
-    public ResponseEntity<AppointmentDto> getAppointmentById(@PathVariable Long id,@PathVariable Long appointmentId) {
+    public ResponseEntity<AppointmentResponseDto> getAppointmentById(@PathVariable Long id,@PathVariable Long appointmentId) {
         checkAuthenticatedUser(id);
-        AppointmentDto appointmentDto = appointmentServicesImp.getAppointmentById(appointmentId);
+        AppointmentResponseDto appointmentDto = appointmentServicesImp.getAppointmentById(appointmentId);
         return ResponseEntity.ok(appointmentDto);
     }
 
@@ -69,9 +69,9 @@ public class AppointmentController {
      * @return ResponseEntity with the created AppointmentDto object and HTTP status code 201 (CREATED).
      */
     @PostMapping("/{id}")
-    public ResponseEntity<AppointmentDto> addAppointment(@PathVariable Long id,@Valid @RequestBody AppointmentDto appointmentDto) {
+    public ResponseEntity<AppointmentResponseDto> addAppointment(@PathVariable Long id,@Valid @RequestBody AppointmentDto appointmentDto) {
         checkAuthenticatedUser(id);
-        AppointmentDto createdAppointment = appointmentServicesImp.addAppointment(appointmentDto);
+        AppointmentResponseDto createdAppointment = appointmentServicesImp.addAppointment(appointmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
     }
 
@@ -96,9 +96,9 @@ public class AppointmentController {
      * @return ResponseEntity containing the updated AppointmentDto with the new status.
      */
     @PutMapping("/{id}/reschedule/{appointmentId}")
-    public ResponseEntity<AppointmentDto> updateAppointmentStatus(@PathVariable Long id,@PathVariable Long appointmentId, @RequestBody @Valid AppointmentDto appointmentDto) {
+    public ResponseEntity<AppointmentResponseDto> updateAppointmentStatus(@PathVariable Long id,@PathVariable Long appointmentId, @RequestBody @Valid AppointmentDto appointmentDto) {
         checkAuthenticatedUser(id);
-        AppointmentDto updatedAppointment = appointmentServicesImp.rescheduleAppointment(appointmentId, appointmentDto);
+        AppointmentResponseDto updatedAppointment = appointmentServicesImp.rescheduleAppointment(appointmentId, appointmentDto);
         return ResponseEntity.ok(updatedAppointment);
     }
 
@@ -173,9 +173,9 @@ public class AppointmentController {
      * @return ResponseEntity containing the confirmed AppointmentDto.
      */
     @PutMapping("/{id}/confirm/{appointmentId}")
-    public ResponseEntity<AppointmentDto> confirmAppointment(@PathVariable Long appointmentId, @PathVariable Long id) {
+    public ResponseEntity<AppointmentResponseDto> confirmAppointment(@PathVariable Long appointmentId, @PathVariable Long id) {
         checkAuthenticatedDoctor(id);
-        AppointmentDto confirmedAppointment = appointmentServicesImp.confirmAppointment(appointmentId);
+        AppointmentResponseDto confirmedAppointment = appointmentServicesImp.confirmAppointment(appointmentId);
         return ResponseEntity.ok(confirmedAppointment);
     }
 
@@ -199,11 +199,11 @@ public class AppointmentController {
      * @return A ResponseEntity containing the AppointmentDto of the canceled appointment.
      */
     @PutMapping("/{id}/{appointmentId}/cancel-by-patient")
-    public ResponseEntity<AppointmentDto> cancelAppointmentByPatient(
+    public ResponseEntity<AppointmentResponseDto> cancelAppointmentByPatient(
             @PathVariable Long appointmentId,
             @RequestBody StringDto cancellationReason, @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        AppointmentDto canceled = appointmentServicesImp.cancelAppointmentByPatient(appointmentId, cancellationReason.getName());
+        AppointmentResponseDto canceled = appointmentServicesImp.cancelAppointmentByPatient(appointmentId, cancellationReason.getName());
         return ResponseEntity.ok(canceled);
     }
 
@@ -215,10 +215,10 @@ public class AppointmentController {
      * @return ResponseEntity containing the updated AppointmentDto object with the new status
      */
     @PutMapping("/{appointmentId}/status")
-    public ResponseEntity<AppointmentDto> updateAppointmentStatus(
+    public ResponseEntity<AppointmentResponseDto> updateAppointmentStatus(
             @PathVariable Long appointmentId,
             @RequestParam AppointmentStatus status) {
-        AppointmentDto updated = appointmentServicesImp.updateAppointmentStatus(appointmentId, status);
+        AppointmentResponseDto updated = appointmentServicesImp.updateAppointmentStatus(appointmentId, status);
         return ResponseEntity.ok(updated);
     }
 
@@ -268,9 +268,9 @@ public class AppointmentController {
      * @return ResponseEntity<List < AppointmentDto>> A list of AppointmentDto objects representing the cancelled appointments.
      */
     @GetMapping("/{id}/doctor/{doctorId}/cancelled-appointments")
-    public ResponseEntity<List<AppointmentDto>> getCancelledAppointments(@PathVariable Long doctorId, @PathVariable Long id) {
+    public ResponseEntity<List<AppointmentResponseDto>> getCancelledAppointments(@PathVariable Long doctorId, @PathVariable Long id) {
         checkAuthenticatedUser(id);
-        List<AppointmentDto> cancelledAppointments = appointmentServicesImp.getCancelledAppointments(doctorId);
+        List<AppointmentResponseDto> cancelledAppointments = appointmentServicesImp.getCancelledAppointments(doctorId);
         return ResponseEntity.ok(cancelledAppointments);
     }
 
@@ -309,11 +309,11 @@ public class AppointmentController {
      * @return ResponseEntity containing a list of AppointmentDto objects representing the patient's appointment history.
      */
     @GetMapping("/patient/{patientId}/history")
-    public ResponseEntity<List<AppointmentDto>> getPatientHistory(
+    public ResponseEntity<List<AppointmentResponseDto>> getPatientHistory(
             @PathVariable Long patientId,
             @RequestBody @Valid MonthsDto monthsBack) {
         checkAuthenticatedUser(patientId);
-        List<AppointmentDto> history = appointmentServicesImp.getPatientHistory(patientId, monthsBack.getMonths());
+        List<AppointmentResponseDto> history = appointmentServicesImp.getPatientHistory(patientId, monthsBack.getMonths());
         return ResponseEntity.ok(history);
     }
 
