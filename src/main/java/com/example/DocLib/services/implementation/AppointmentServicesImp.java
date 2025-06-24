@@ -341,8 +341,13 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
 
     @Override
-    public List<AppointmentResponseDto> searchDoctorAppointment(String q) {
-        return List.of();
+    public List<AppointmentResponseDto> searchAppointments(String query,
+                                                           List<AppointmentStatus> statuses,
+                                                           LocalDateTime startTime,
+                                                           LocalDateTime endTime) {
+        return getResponseAppointmentList(
+                appointmentRepository.searchAppointments(query, statuses, startTime, endTime)
+        );
     }
 
     private AppointmentDto convertAppointmentToDto(Appointment appointment) {
