@@ -420,7 +420,6 @@ public class DoctorController {
                                                     @PathVariable Long scheduleId,
                                                     @RequestBody @Valid DoctorScheduleDto dto) {
         checkAuthenticatedUser(doctorId);
-        dto.setId(scheduleId);
         DoctorDto updatedDoctor = doctorServicesImp.updateSchedule(doctorId, dto);
         return ResponseEntity.ok(updatedDoctor);
     }

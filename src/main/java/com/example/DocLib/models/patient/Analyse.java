@@ -26,7 +26,7 @@ public class Analyse {
     private Analyses analyses;
 
     @Column(name = "result")
-    private String result;
+    private String filepath;
 
     @Column(name = "description")
     private String description;

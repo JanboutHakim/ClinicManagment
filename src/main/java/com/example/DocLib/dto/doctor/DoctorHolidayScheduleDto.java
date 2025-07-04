@@ -18,14 +18,13 @@ public class DoctorHolidayScheduleDto {
 
     private long doctorId;
 
-    @PastOrPresent(message = "Holiday Date should be in the past or present.")
-    @NotNull(message = "Holiday Date is required.")
 
-    @FutureOrPresent
+
+    @FutureOrPresent(message = "Holiday Date should be in the present or in the future.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startTime;
 
-    @Future
+    @Future(message = "Holiday Date should be in the future.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endTime;
 

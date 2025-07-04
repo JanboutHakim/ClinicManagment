@@ -58,14 +58,15 @@ public class WebSecurityConfig {
                                 "/app/**",
                                 "/ws/**",
                                 "/doctors/search",
+                                "/doctors",
                                 "appointments/doctor/**",
                                 "/drugs",
                                 "/images/**",
                                 "/auth/verify-otp"
                         ).permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/auth/**").permitAll()
-                        .requestMatchers("/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/patient/**").hasRole("PATIENT")
+                        .requestMatchers("/doctors/**").hasRole("DOCTOR")
+                        .requestMatchers("/patients/**").hasRole("PATIENT")
                         .requestMatchers("/appointments/**").hasAnyRole("DOCTOR", "PATIENT")
                         .anyRequest().authenticated()
                 )

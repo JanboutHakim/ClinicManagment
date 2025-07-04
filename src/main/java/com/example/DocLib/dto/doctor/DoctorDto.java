@@ -2,15 +2,16 @@ package com.example.DocLib.dto.doctor;
 
 import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.InsuranceCompanyDto;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.example.DocLib.enums.Gender;
+import com.example.DocLib.enums.Roles;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @NoArgsConstructor
@@ -31,6 +32,26 @@ public class DoctorDto {
     @Size(min = 10, message = "Phone Number must be at least 10 characters long")
     @Pattern(regexp = "^\\+?[0-9]{10,14}$", message = "Phone number must be between 10 and 15 characters and may start with +")
     private String clinicPhoneNumber;
+    @NotBlank(message = "Name is required")
+    private String name;
+
+
+
+    @NotBlank(message = "Phone number is required")
+    @Size(min = 10, message = "Phone Number must be at least 10 characters long")
+    @Pattern(regexp = "^\\+?[0-9]{10,14}$", message = "Phone number must be between 10 and 15 characters and may start with +")
+    private String phoneNumber;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate DOB;
+
+    private String ImageUrl;
+
+
+    @NotNull(message = "Gender is required")
+    private Gender gender;
+
+
 
     @Min(value = 1, message = "Checkup duration must be positive")
     private int checkupDurationInMinutes;

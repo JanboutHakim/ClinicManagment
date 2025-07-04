@@ -1,6 +1,7 @@
 package com.example.DocLib.services.implementation;
 
 import com.example.DocLib.dto.UserDto;
+import com.example.DocLib.enums.Roles;
 import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.User;
 import com.example.DocLib.repositories.UserRepository;
@@ -72,7 +73,10 @@ public class UserServicesImp {
     public void setUserImagePath(Long userId,String imagePath){
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new ResourceNotFoundException("User not exist"));
-        user.setImageUrl(imagePath);
+        if(user.getRole().equals(Roles.DOCTOR))
+             user.getDoctor().setImageUrl(imagePath);
+        else if(user.getRole().equals(Roles.PATIENT))
+            user.getPatient().setImageUrl(imagePath);
     }
 
     public String saveImage(MultipartFile file) throws IOException {

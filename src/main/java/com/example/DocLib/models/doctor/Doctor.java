@@ -1,5 +1,6 @@
 package com.example.DocLib.models.doctor;
 
+import com.example.DocLib.enums.Gender;
 import com.example.DocLib.exceptions.custom.ResourceNotFoundException;
 import com.example.DocLib.models.appointment.Appointment;
 import com.example.DocLib.models.InsuranceCompany;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -31,6 +33,21 @@ public class Doctor {
     private String clinicName;
 
     private String clinicPhoneNumber;
+    @Column(nullable = false)
+    private String name;
+
+
+    @Column(name = "phone_number",length = 15,nullable = false)
+    private String phoneNumber;
+
+    @Column(name = "date_of_birth")
+    private LocalDate DOB;
+
+    @Column(name = "image_url")
+    private  String ImageUrl;
+
+    @Column(name = "gender")
+    private Gender gender;
 
     private String address;
 

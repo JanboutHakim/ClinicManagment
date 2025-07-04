@@ -3,7 +3,10 @@ package com.example.DocLib.services.implementation;
 import com.example.DocLib.dto.appointment.AppointmentDto;
 import com.example.DocLib.dto.appointment.AppointmentNotificationDto;
 import com.example.DocLib.dto.appointment.AppointmentResponseDto;
+import com.example.DocLib.dto.doctor.DoctorDto;
 import com.example.DocLib.dto.doctor.TimeBlock;
+import com.example.DocLib.dto.patient.PatientDto;
+import com.example.DocLib.dto.patient.PatientResponseDto;
 import com.example.DocLib.enums.AppointmentStatus;
 import com.example.DocLib.exceptions.custom.AppointmentNotAvailableAtThisTime;
 import com.example.DocLib.models.appointment.Appointment;
@@ -26,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentServicesImp implements AppointmentServices {
@@ -112,6 +117,7 @@ public class AppointmentServicesImp implements AppointmentServices {
         } else if (!isPatientAvailable(appointmentDto.getPatientId(), appointmentDto.getDoctorId(), appointmentDto.getStartTime())) {
             throw new AppointmentNotAvailableAtThisTime("Patient is not available at the requested time.");
         }
+        appointmentDto.setId(appointmentId); // prevent overwriting ID
 
         modelMapper.map(appointmentDto, appointment);
         appointment.setStatus(AppointmentStatus.RESCHEDULED);
@@ -206,6 +212,35 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
 
     @Override
+    public List<AppointmentResponseDto> getTodayAppointmentByDoctor(Long doctorId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        List<Appointment> appointments = appointmentRepository
+                .findByDoctorIdAndStartTimeBetween(doctorId, startOfDay, endOfDay);
+
+        return appointments.stream()
+                .map(this::getDoctorAndPatientName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AppointmentResponseDto> getTodayAppointmentByPatient(Long patientId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        List<Appointment> appointments = appointmentRepository
+                .findByPatientIdAndStartTimeBetween(patientId, startOfDay, endOfDay);
+
+        return appointments.stream()
+                .map(this::getDoctorAndPatientName)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
     public List<AppointmentResponseDto> getUpcomingAppointmentsForPatient(Long patientId) {
         return getResponseAppointmentList(appointmentRepository.findUpcomingAppointmentByPatient(patientId, LocalDateTime.now()));
     }
@@ -251,7 +286,7 @@ public class AppointmentServicesImp implements AppointmentServices {
                         if (isDoctorAvailable(doctorId, slotStart) && !isDoctorOnVacation(doctorId, slotStart)) {
                             availableSlots.add(slotStart);
                         }
-                        slotStart = slotStart.plusMinutes(30);
+                        slotStart = slotStart.plusMinutes(checkupDuration);
                     }
                 }
             }
@@ -352,6 +387,32 @@ public class AppointmentServicesImp implements AppointmentServices {
         );
     }
 
+    @Override
+    public List<PatientResponseDto> getDoctorPatients(Long id) {
+        List<Appointment> appointments = appointmentRepository.getDoctorPatients(id);
+
+        return appointments.stream()
+                .map(this::getPatientResponseDto)
+                .toList();
+    }
+
+    @Override
+    public PatientDto getDoctorPatient(Long doctorId,Long patientId) {
+        PatientDto patientDto = patientServicesImp.getPatientById(patientId);
+
+        if (patientDto.getAppointments() != null) {
+            patientDto.getAppointments().removeIf(appointment ->
+                    !doctorId.equals(appointment.getDoctorId())
+            );
+        }
+        return patientDto;
+    }
+
+    @Override
+    public DoctorDto getDoctor(Long doctorId) {
+        return modelMapper.map(doctorServicesImp.getDoctorById(doctorId),DoctorDto.class);
+    }
+
     private AppointmentDto convertAppointmentToDto(Appointment appointment) {
         return modelMapper.map(appointment, AppointmentDto.class);
     }
@@ -374,9 +435,16 @@ public class AppointmentServicesImp implements AppointmentServices {
     }
     private AppointmentResponseDto getDoctorAndPatientName(Appointment appointment){
         AppointmentResponseDto appointmentResponseDto = modelMapper.map(appointment,AppointmentResponseDto.class);
-        appointmentResponseDto.setPatientName(userServicesImp.findById(appointment.getPatient().getId()).get().getName());
+        appointmentResponseDto.setPatientName(patientServicesImp.getPatientById(appointment.getPatient().getId()).getName());
         appointmentResponseDto.setDoctorName(doctorServicesImp.getDoctorEntity(appointment.getDoctor().getId()).getClinicName());
         return appointmentResponseDto;
+    }
+
+    private PatientResponseDto getPatientResponseDto(Appointment appointment){
+        return  new PatientResponseDto(appointment.getPatient().getId(),
+                                       appointment.getPatient().getName(),
+                                       appointment.getPatient().getPhoneNumber(),
+                                       appointment.getPatient().getAddress());
     }
 
     public int getCachedCheckupDuration(Long doctorId) {

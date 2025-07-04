@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
@@ -26,6 +28,8 @@ public class DoctorService {
     @Column(name = "services")
     @Enumerated
     private Services service;
+
+    private BigDecimal price;
 
 
     @Override

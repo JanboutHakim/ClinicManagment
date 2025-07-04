@@ -29,27 +29,13 @@ public  class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String name;
-
     @Column(name = "email")
     private String email;
-
-    @Column(name = "phone_number",length = 15,nullable = false)
-    private String phoneNumber;
-
-    @Column(name = "date_of_birth")
-    private LocalDate DOB;
-
-    @Column(name = "image_url")
-    private  String ImageUrl;
 
     @Enumerated
     @Column(name = "role")
     private Roles role;
 
-    @Column(name = "gender")
-    private Gender gender;
 
     @Builder.Default
     @Column(name = "email_verified")

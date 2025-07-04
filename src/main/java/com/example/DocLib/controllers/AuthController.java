@@ -40,7 +40,6 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserDto> > register(@RequestBody @Valid UserDto userDto) throws MessagingException {
         UserDto createdUser = authServices.registerUser(userDto);
-
         ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
                 .data(createdUser)
                 .message("User registered. Check email for verification code")

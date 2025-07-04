@@ -1,6 +1,7 @@
 package com.example.DocLib.models.appointment;
 
 import com.example.DocLib.enums.AppointmentStatus;
+import com.example.DocLib.enums.Services;
 import com.example.DocLib.models.doctor.Doctor;
 import com.example.DocLib.models.patient.Patient;
 import jakarta.persistence.*;
@@ -34,7 +35,7 @@ public class Appointment {
     private Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String reason;
+    private Services reason;
     private String notes;
     private String cancellationReason;
     private LocalDateTime createdAt;

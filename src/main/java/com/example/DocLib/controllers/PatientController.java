@@ -170,4 +170,10 @@ public class PatientController {
         PatientDto patientDto = patientServicesImp.addDrug(patientId,patientDrugDto);
         return ResponseEntity.ok(patientDto);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<PatientDto> getPatient(@PathVariable Long id){
+        checkAuthenticatedUser(id);
+        PatientDto patientDto = patientServicesImp.getPatientById(id);
+        return ResponseEntity.ok(patientDto);
+    }
 }

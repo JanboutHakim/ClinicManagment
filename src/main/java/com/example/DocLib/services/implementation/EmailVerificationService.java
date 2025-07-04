@@ -26,7 +26,7 @@ public class EmailVerificationService {
                 .user(user)
                 .build();
         tokenRepository.save(token);
-        emailService.sendOtp(user.getEmail(), user.getName(), otp);
+        emailService.sendOtp(user.getEmail(), user.getUsername(), otp);
     }
 
     public boolean verifyToken(String username, String otp) {

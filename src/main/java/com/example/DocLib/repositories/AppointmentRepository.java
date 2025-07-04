@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
 
@@ -60,6 +61,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
     boolean existsByPatientIdAndStartTime(Long patientId, LocalDateTime startTime);
     boolean existsByDoctorIdAndStartTime(Long doctorId, LocalDateTime startTime);
     List<Appointment> findByPatientIdAndStartTimeBetween(Long patientId, LocalDateTime start, LocalDateTime end);
+    List<Appointment> findByDoctorIdAndStartTimeBetween(Long doctorId, LocalDateTime start, LocalDateTime end);
     List<Appointment> findByDoctorIdAndStatusIn(Long doctorId, List<AppointmentStatus> statuses);
     List<Appointment> findByDoctor(Doctor doctor);
     List<Appointment> findByPatient(Patient patient);
@@ -79,5 +81,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
                                          @Param("endTime") LocalDateTime endTime,
                                          @Param("doctorId") Long doctorId,
                                          @Param("patientId") Long patientId);
+    @Query("SELECT a FROM Appointment a WHERE a.id IN (SELECT MIN(id) FROM Appointment ap WHERE ap.doctor.id = :doctorId GROUP BY ap.patient.id)")
+    List<Appointment> getDoctorPatients(@Param("doctorId") Long doctorId);
 
 }

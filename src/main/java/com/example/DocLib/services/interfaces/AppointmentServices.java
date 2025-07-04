@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.DocLib.dto.appointment.AppointmentResponseDto;
+import com.example.DocLib.dto.doctor.DoctorDto;
+import com.example.DocLib.dto.patient.PatientDto;
+import com.example.DocLib.dto.patient.PatientResponseDto;
 import com.example.DocLib.enums.AppointmentStatus;
 
 
@@ -31,6 +34,8 @@ public interface AppointmentServices {
         List<AppointmentResponseDto> getAppointmentsByDateRange(LocalDateTime start, LocalDateTime end);
         List<AppointmentResponseDto> getUpcomingAppointmentsForPatient(Long doctorId);
         List<AppointmentResponseDto> getUpcomingAppointmentsForDoctor(Long doctorId);
+        List<AppointmentResponseDto> getTodayAppointmentByDoctor(Long doctorId);
+        List<AppointmentResponseDto> getTodayAppointmentByPatient(Long doctorId);
 
         // Availability Checking
         boolean isPatientAvailable(Long patientId, Long doctorId, LocalDateTime startTime);
@@ -57,6 +62,10 @@ public interface AppointmentServices {
                                                         LocalDateTime endTime,
                                                         Long doctorId,
                                                         Long patientId);
+
+        List<PatientResponseDto> getDoctorPatients(Long id);
+        PatientDto getDoctorPatient(Long doctorId,Long patientId);
+        DoctorDto getDoctor(Long doctorId);
     }
 
 

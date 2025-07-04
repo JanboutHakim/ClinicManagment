@@ -20,7 +20,7 @@ public class AnalyseDto {
 
         @NotNull
         @Size(min = 1, max = 100)
-        private String result;
+        private String filepath;
 
         @Size(max = 500)
         private String description;
