@@ -23,15 +23,10 @@ public class MapperConfig {
         modelMapper.typeMap(DoctorServiceDto.class, DoctorService.class)
                 .addMappings(mapper -> mapper.skip(DoctorService::setId));
         modelMapper.typeMap(DoctorScheduleDto.class, DoctorSchedule.class)
-                .addMappings(mapper -> {
-                    mapper.skip(DoctorSchedule::setId);
-                    mapper.skip(DoctorSchedule::setDoctor);
-                });
+                .addMappings(mapper -> mapper.skip(DoctorSchedule::setId));
+
         modelMapper.typeMap(DoctorHolidayScheduleDto.class, DoctorHolidaySchedule.class)
-                .addMappings(mapper -> {
-                    mapper.skip(DoctorHolidaySchedule::setId);
-                    mapper.skip(DoctorHolidaySchedule::setDoctor);
-                });
+                .addMappings(mapper -> mapper.skip(DoctorHolidaySchedule::setId));
 
         return modelMapper;
     }
