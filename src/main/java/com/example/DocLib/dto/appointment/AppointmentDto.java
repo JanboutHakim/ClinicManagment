@@ -1,6 +1,7 @@
 package com.example.DocLib.dto.appointment;
 
 import com.example.DocLib.enums.AppointmentStatus;
+import com.example.DocLib.enums.Services;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -23,7 +24,7 @@ public class AppointmentDto {
     private Long doctorId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String reason;
+    private Services reason;
     private String notes;
     @Null
     private AppointmentStatus status;

@@ -4,6 +4,7 @@ import com.example.DocLib.dto.AddressDto;
 import com.example.DocLib.dto.InsuranceCompanyDto;
 import com.example.DocLib.dto.StringDto;
 import com.example.DocLib.dto.doctor.*;
+import com.example.DocLib.enums.Services;
 import com.example.DocLib.exceptions.custom.AccessDeniedException;
 import com.example.DocLib.models.Drug;
 import com.example.DocLib.services.implementation.AppointmentServicesImp;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 /**
  * The {@code DoctorController} class is a Spring REST controller that manages endpoints related to doctor operations.
@@ -212,6 +214,11 @@ public class DoctorController {
     public ResponseEntity<List<DoctorServiceDto>> getServices(@PathVariable Long doctorId) {
         List<DoctorServiceDto> services = doctorServicesImp.getServices(doctorId);
         return ResponseEntity.ok(services);
+    }
+
+    @GetMapping("/services")
+    public ResponseEntity<List<Services>> getAllServices(){
+        return ResponseEntity.ok(Arrays.asList(Services.values()));
     }
     /**
      *

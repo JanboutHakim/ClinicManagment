@@ -190,6 +190,7 @@ public class DoctorServicesImp implements DoctorServices {
     @Transactional
     public DoctorDto addService(Long doctorId, DoctorServiceDto dto) {
         Doctor doctor = getDoctorEntity(doctorId);
+        System.out.println(dto.toString());
         DoctorService service = modelMapper.map(dto, DoctorService.class);
         doctor.addService(service);
         return convertDoctorToDto(doctor);
